@@ -1,25 +1,20 @@
-//---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 
-#include <vcl.h>
+#include <fmx.h>
 #pragma hdrstop
 
 #include "Principal.h"
-#include "Config.h"
 #include <iostream>
 #include "Threads/ThreadSerialBufferIn.h"
-//---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 #pragma package(smart_init)
-#pragma resource "*.dfm"
+#pragma link "FrameConfig"
+#pragma resource "*.fmx"
 TfrmPrincipal *frmPrincipal;
-//---------------------------------------------------------------------------
-__fastcall TfrmPrincipal::TfrmPrincipal(TComponent* Owner)
-	: TForm(Owner)
+
+// ---------------------------------------------------------------------------
+__fastcall TfrmPrincipal::TfrmPrincipal(TComponent* Owner) : TForm(Owner)
 {
-}
-//---------------------------------------------------------------------------
-void __fastcall TfrmPrincipal::btnGroupMenuItems0Click(TObject *Sender)
-{
-	frmConfig->Show();
 }
 //---------------------------------------------------------------------------
 void TfrmPrincipal::LoadCommPorts()
@@ -32,8 +27,8 @@ void TfrmPrincipal::LoadCommPorts()
 
 		if(ASuccess!=0)
 		{
-			frmConfig->cbbSerialPort->Items->Add(AComPort.c_str());
-			frmConfig->cbbSerialPort->ItemIndex = 0;
+			fraConfig->cbbSerialPort->Items->Add(AComPort.c_str());
+			fraConfig->cbbSerialPort->ItemIndex = 0;
 		}
 
 		if(::GetLastError()==ERROR_INSUFFICIENT_BUFFER)
@@ -54,10 +49,10 @@ void TfrmPrincipal::ConnectSerialPort()
 	FSerialPort = new SerialPort();
 	try
 	{
-		FSerialPort->OpenSerialPort(frmConfig->cbbSerialPort->Text, frmConfig->cbbBaudrate->Text);
-		frmConfig->cbbSerialPort->Enabled = false;
-		frmConfig->cbbBaudrate->Enabled = false;
-
+		FSerialPort->OpenSerialPort(fraConfig->cbbSerialPort->Selected->Text, fraConfig->cbbBaudrate->Selected->Text);
+		fraConfig->cbbSerialPort->Enabled = false;
+		fraConfig->cbbBaudrate->Enabled = false;
+		ThreadSerialBufferIn *AThreadSerialBufferIn = new ThreadSerialBufferIn(false);
 	}
 	__except(EXCEPTION_EXECUTE_HANDLER)
 	{
@@ -73,8 +68,8 @@ void TfrmPrincipal::DisconnectSerialPort()
 	FSerialPort->CloseSerialPort();
 	FSerialPort = NULL;
 	delete FSerialPort;
-	frmConfig->cbbSerialPort->Enabled = true;
-	frmConfig->cbbBaudrate->Enabled = true;
+	fraConfig->cbbSerialPort->Enabled = true;
+	fraConfig->cbbBaudrate->Enabled = true;
 }
 //---------------------------------------------------------------------------
 void TfrmPrincipal::ClearChartSeries()
@@ -86,10 +81,19 @@ void TfrmPrincipal::ClearChartSeries()
 	chtCH1Signal->Axes->Bottom->Maximum = PLOT_WINDOW;
 }
 //---------------------------------------------------------------------------
-void __fastcall TfrmPrincipal::btnGroupMenuItems1Click(TObject *Sender)
+void __fastcall TfrmPrincipal::btnConnectClick(TObject *Sender)
 {
 	ConnectSerialPort();
-	ThreadSerialBufferIn *AThreadSerialBufferIn = new ThreadSerialBufferIn(false);
+}
+//---------------------------------------------------------------------------
+void __fastcall TfrmPrincipal::btnDisconnectClick(TObject *Sender)
+{
+	DisconnectSerialPort();
+}
+//---------------------------------------------------------------------------
+void __fastcall TfrmPrincipal::btnCleanChartClick(TObject *Sender)
+{
+	ClearChartSeries();
 }
 //---------------------------------------------------------------------------
 void __fastcall TfrmPrincipal::FormShow(TObject *Sender)
@@ -97,15 +101,10 @@ void __fastcall TfrmPrincipal::FormShow(TObject *Sender)
 	LoadCommPorts();
 }
 //---------------------------------------------------------------------------
-void __fastcall TfrmPrincipal::btnGroupMenuItems2Click(TObject *Sender)
-{
-	DisconnectSerialPort();
-}
-//---------------------------------------------------------------------------
 
-void __fastcall TfrmPrincipal::btnGroupMenuItems3Click(TObject *Sender)
+void __fastcall TfrmPrincipal::btnConfigClick(TObject *Sender)
 {
-	ClearChartSeries();
+	fraConfig->Visible = true;
 }
 //---------------------------------------------------------------------------
 

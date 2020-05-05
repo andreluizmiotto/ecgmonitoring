@@ -1,53 +1,64 @@
-//---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 
 #ifndef PrincipalH
 #define PrincipalH
-//---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 #include <System.Classes.hpp>
-#include <Vcl.Controls.hpp>
-#include <Vcl.StdCtrls.hpp>
-#include <Vcl.Forms.hpp>
-#include <System.ImageList.hpp>
-#include <Vcl.ExtCtrls.hpp>
-#include <Vcl.ImgList.hpp>
-#include <Vcl.Buttons.hpp>
-#include <Vcl.Menus.hpp>
-#include <Vcl.CategoryButtons.hpp>
-#include <Vcl.ButtonGroup.hpp>
-#include <VCLTee.Chart.hpp>
-#include <VCLTee.Series.hpp>
-#include <VclTee.TeeGDIPlus.hpp>
-#include <VCLTee.TeEngine.hpp>
-#include <VCLTee.TeeProcs.hpp>
+#include <FMX.Controls.hpp>
+#include <FMX.Forms.hpp>
+#include <FMX.Controls.Presentation.hpp>
+#include <FMX.MultiView.hpp>
+#include <FMX.StdCtrls.hpp>
+#include <FMX.Types.hpp>
 //---------------------------------------------------------------------------
 #include "Lib/Const.h"
 #include "Classes/ClassConexaoSerial.cpp"
 #include "Classes/ClassFFT.h"
-//---------------------------------------------------------------------------
-class TfrmPrincipal : public TForm
-{
-__published:	// IDE-managed Components
-	TImageList *imgListIcons;
-	TButtonGroup *btnGroupMenu;
+#include <FMX.TabControl.hpp>
+#include <FMX.ImgList.hpp>
+#include <System.ImageList.hpp>
+#include "FrameConfig.h"
+#include <FMXTee.Chart.hpp>
+#include <FMXTee.Engine.hpp>
+#include <FMXTee.Procs.hpp>
+#include <FMXTee.Series.hpp>
+// ---------------------------------------------------------------------------
+class TfrmPrincipal : public TForm {
+__published: // IDE-managed Components
+	TMultiView *mvMenu;
+	TSpeedButton *btnConfig;
+	TSpeedButton *btnMenu;
+	TSpeedButton *btnDisconnect;
+	TSpeedButton *btnCleanChart;
+	TSpeedButton *btnConnect;
+	TStyleBook *StyleBookPrincipal;
+	TPanel *pBackground;
+	TTabControl *tbcPrincipal;
+	TTabItem *tbiChart;
+	TTabItem *tbiValues;
+	TImageList *ImageListMvMenu;
+	TfraConfig *fraConfig;
 	TChart *chtCH1Signal;
-	TLineSeries *lineSeriesCH1Signal;
-	void __fastcall btnGroupMenuItems0Click(TObject *Sender);
-	void __fastcall btnGroupMenuItems1Click(TObject *Sender);
+	TFastLineSeries *lineSeriesCH1Signal;
+	void __fastcall btnConnectClick(TObject *Sender);
+	void __fastcall btnDisconnectClick(TObject *Sender);
+	void __fastcall btnCleanChartClick(TObject *Sender);
 	void __fastcall FormShow(TObject *Sender);
-	void __fastcall btnGroupMenuItems2Click(TObject *Sender);
-	void __fastcall btnGroupMenuItems3Click(TObject *Sender);
-private:	// User declarations
+	void __fastcall btnConfigClick(TObject *Sender);
+
+private: // User declarations
 	void LoadCommPorts();
 	void RefreshProgressBar();
 	void ConnectSerialPort();
 	void DisconnectSerialPort();
-public:		// User declarations
+public: // User declarations
 	__fastcall TfrmPrincipal(TComponent* Owner);
 	void ClearChartSeries();
 	// Globais
 	SerialPort *FSerialPort;
 };
-//---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
 extern PACKAGE TfrmPrincipal *frmPrincipal;
-//---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 #endif
