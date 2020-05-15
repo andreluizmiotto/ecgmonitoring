@@ -11,6 +11,8 @@
 #include <FMX.StdCtrls.hpp>
 #include <FMX.Types.hpp>
 #include <FMX.Objects.hpp>
+#include <FMX.ImgList.hpp>
+#include <System.ImageList.hpp>
 //---------------------------------------------------------------------------
 class TfraConfig : public TFrame
 {
@@ -19,14 +21,17 @@ __published:	// IDE-managed Components
 	TComboBox *cbbSerialPort;
 	TLabel *lblSerialPort;
 	TLabel *lblBaudrate;
-	TButton *btnApply;
 	TToolBar *tlbConfig;
+	TPanel *pnlBackground;
 	TSpeedButton *btnGoBack;
-	TImage *img1;
+	TSpeedButton *btnApply;
+	TImageList *imgListConfig;
 	void __fastcall btnGoBackClick(TObject *Sender);
 private:	// User declarations
 public:		// User declarations
 	__fastcall TfraConfig(TComponent* Owner);
+	void LoadComPorts();
+   void ShowPopup();
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TfraConfig *fraConfig;

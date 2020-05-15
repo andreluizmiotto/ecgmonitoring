@@ -15,27 +15,25 @@ TfrmPrincipal *frmPrincipal;
 // ---------------------------------------------------------------------------
 __fastcall TfrmPrincipal::TfrmPrincipal(TComponent* Owner) : TForm(Owner)
 {
+   this->tbcPrincipal->ActiveTab = this->tbiChart;
+/*	chartSignal->ClipPoints = false;
+	chartSignal->Title->Visible = false;
+	chartSignal->Legend->Visible = false;
+	chartSignal->LeftAxis->Axis->Width = 1;
+	chartSignal->BottomAxis->Axis->Width = 1;
+	chartSignal->BottomAxis->RoundFirstLabel = false;
+	chartSignal->View3D = false;
+	lineSeriesSignal->XValues->Order = loNone;
+
+	chartSignal->LeftAxis->SetMinMax(0, 1023);
+	chartSignal->BottomAxis->SetMinMax(1, 500);
+
+//	chartSignal->Canvas->ReferenceCanvas->Pen->OwnerCriticalSection = NULL;
+//	lineSeriesSignal->LinePen->OwnerCriticalSection = NULL;
+	chartSignal->Axes->FastCalc = true;*/
 }
 //---------------------------------------------------------------------------
-void TfrmPrincipal::LoadCommPorts()
-{
-	TCHAR lpTargetPath[5000]; // buffer to store the path of the COMPORTS
-	for(int i=0; i<255; i++) // checking ports from COM0 to COM255
-	{
-		std::string AComPort = "COM" + std::to_string(i);
-		DWORD ASuccess = QueryDosDevice(charToWChar(AComPort.c_str()), charToWChar((LPSTR)lpTargetPath), 5000);
 
-		if(ASuccess!=0)
-		{
-			fraConfig->cbbSerialPort->Items->Add(AComPort.c_str());
-			fraConfig->cbbSerialPort->ItemIndex = 0;
-		}
-
-		if(::GetLastError()==ERROR_INSUFFICIENT_BUFFER)
-		{
-		}
-	}
-}
 //---------------------------------------------------------------------------
 void TfrmPrincipal::ConnectSerialPort()
 {
@@ -74,11 +72,11 @@ void TfrmPrincipal::DisconnectSerialPort()
 //---------------------------------------------------------------------------
 void TfrmPrincipal::ClearChartSeries()
 {
-	lineSeriesCH1Signal->Clear();
-	chtCH1Signal->Axes->Left->Minimum = 0;
-	chtCH1Signal->Axes->Left->Maximum = 0;
-	chtCH1Signal->Axes->Bottom->Minimum = 0;
-	chtCH1Signal->Axes->Bottom->Maximum = PLOT_WINDOW;
+	lineSeriesSignal->Clear();
+	chartSignal->Axes->Left->Minimum = 0;
+	chartSignal->Axes->Left->Maximum = 1023;
+	chartSignal->Axes->Bottom->Minimum = 0;
+	chartSignal->Axes->Bottom->Maximum = PLOT_WINDOW;
 }
 //---------------------------------------------------------------------------
 void __fastcall TfrmPrincipal::btnConnectClick(TObject *Sender)
@@ -98,13 +96,40 @@ void __fastcall TfrmPrincipal::btnCleanChartClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TfrmPrincipal::FormShow(TObject *Sender)
 {
-	LoadCommPorts();
+	fraConfig->LoadComPorts();
 }
 //---------------------------------------------------------------------------
 
 void __fastcall TfrmPrincipal::btnConfigClick(TObject *Sender)
 {
-	fraConfig->Visible = true;
+	fraConfig->ShowPopup();
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TfrmPrincipal::chartSignalAfterDraw(TObject *Sender)
+{
+	double xIni, xFin, yIni, yFin;
+
+	xIni = chartSignal->BottomAxis->CalcPosValue(FChartXPos - 1) - 8;
+	yIni = chartSignal->LeftAxis->CalcPosValue(chartSignal->LeftAxis->Minimum) - 1;
+	xFin = chartSignal->BottomAxis->CalcPosValue(FChartXPos - 1) + 8;
+	yFin = chartSignal->LeftAxis->CalcPosValue(chartSignal->LeftAxis->Maximum) + 1;
+
+	if (xFin < chartSignal->BottomAxis->CalcPosValue(chartSignal->BottomAxis->Maximum)+8)
+	{
+		//Chart1->Canvas->Pen->Style = psSolid;
+		//Chart1->Canvas->Pen->Color = clWhite;
+		//Chart1->Canvas->Brush->Color = clWhite;
+		//Chart1->Canvas->ReferenceCanvas->Pen->Color = clWhite/
+		//Chart1->Canvas->Fill->Color = TAlphaColorRec::White;
+
+//		lineSeriesCH1Signal->FastPen = true;
+		chartSignal->Canvas->Rectangle(xIni, yIni, xFin, yFin); //->AssignBrushColor(clWhite)->;
+		chartSignal->Canvas->ReferenceCanvas->Fill->Color = 0xFF3F3F3F;
+		chartSignal->Canvas->ReferenceCanvas->Stroke->Color = 0xFF3F3F3F;
+	}
+	if (FChartXPos > PLOT_WINDOW)
+		FChartXPos = 0;
 }
 //---------------------------------------------------------------------------
 

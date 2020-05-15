@@ -211,7 +211,7 @@ char * SerialPort::ReadABuffer() {
 		osRead.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 
 		if (osRead.hEvent != NULL) {
-			strcpy(Buffer, "\x0");
+			memcpy(Buffer, "\x0", sizeof Buffer);
 			if (ReadFile(hComm, &Buffer, dwToRead, &dwRead, &osRead)) {
 				// Encerra corretamente a string para não retornar lixo.
 				Buffer[dwRead] = '\0';
@@ -244,6 +244,55 @@ char * SerialPort::ReadABuffer() {
 
 // ---------------------------------------------------------------------------
 
+std::vector<unsigned char> SerialPort::ReadBuffer()
+{
+    std::vector <unsigned char> dest(256);
+
+    OVERLAPPED osRead = {0};
+
+    if (hComm != NULL)
+    {
+        // Create this writes OVERLAPPED structure hEvent.
+        osRead.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+        if (osRead.hEvent != NULL)
+        {
+			strcpy(Buffer,"\x0");
+            if (ReadFile(hComm, &Buffer, dwToRead, &dwRead, &osRead))
+            {
+                //Encerra corretamente a string para não retornar lixo.
+                Buffer[dwRead] = '\0';
+                memcpy(&dest[0], &Buffer[0], dwRead*sizeof(char));
+            }
+            else
+            {
+//                ShowMessage("ERRO AO LER DADOS DA PORTA SERIAL");
+			}
+		}
+		else
+		{
+//            ShowMessage("ERRO AO ABRIR A PORTA SERIAL");
+			CloseHandle(hComm);
+			//return (FALSE);
+		}
+
+		CloseHandle(osRead.hEvent);
+	}
+	else
+	{
+//        ShowMessage("ERRO AO ABRIR A PORTA SERIAL");
+		CloseHandle(hComm);
+        //return (FALSE);
+    }
+
+    //Finaliza todas as pendências de escrita e leitura da porta serial selecionada.
+    PurgeComm(hComm, PURGE_TXABORT | PURGE_RXABORT | PURGE_TXCLEAR | PURGE_RXCLEAR);
+
+    //Retorna o buffer recebido.
+    return (dest);
+}
+
+//---------------------------------------------------------------------------
+
 unsigned int SerialPort::getBufferSize() {
 	// Obtém o número de bytes no buffer serial a serem lidos.
 	return (dwRead);
@@ -259,4 +308,25 @@ void SerialPort::CloseSerialPort() {
 		CloseHandle(hComm);
 		hComm = NULL;
 	}
+}
+
+// ---------------------------------------------------------------------------
+
+TStringList *SerialPort::LoadComPorts()
+{
+	TCHAR lpTargetPath[5000]; // Buffer para armazenar o caminho das COMPORTS
+	TStringList *AComPorts = new TStringList;
+	for(int i = 0; i < 50; i++) // Verifica portas de 0 a 50
+	{
+		String AComPort = "COM" + IntToStr(i);
+		DWORD ASuccess = QueryDosDevice(AComPort.c_str(), charToWChar((LPSTR)lpTargetPath), 5000);
+
+		if(ASuccess!=0)
+			AComPorts->Add(AComPort);
+
+		if(::GetLastError()==ERROR_INSUFFICIENT_BUFFER)
+		{
+		}
+	}
+	return AComPorts;
 }

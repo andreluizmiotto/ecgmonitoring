@@ -22,6 +22,8 @@
 #include <FMXTee.Engine.hpp>
 #include <FMXTee.Procs.hpp>
 #include <FMXTee.Series.hpp>
+#include <FMX.Memo.hpp>
+#include <FMX.ScrollBox.hpp>
 // ---------------------------------------------------------------------------
 class TfrmPrincipal : public TForm {
 __published: // IDE-managed Components
@@ -37,17 +39,18 @@ __published: // IDE-managed Components
 	TTabItem *tbiChart;
 	TTabItem *tbiValues;
 	TImageList *ImageListMvMenu;
+	TChart *chartSignal;
+	TFastLineSeries *lineSeriesSignal;
+	TMemo *meSignal;
 	TfraConfig *fraConfig;
-	TChart *chtCH1Signal;
-	TFastLineSeries *lineSeriesCH1Signal;
 	void __fastcall btnConnectClick(TObject *Sender);
 	void __fastcall btnDisconnectClick(TObject *Sender);
 	void __fastcall btnCleanChartClick(TObject *Sender);
 	void __fastcall FormShow(TObject *Sender);
 	void __fastcall btnConfigClick(TObject *Sender);
+	void __fastcall chartSignalAfterDraw(TObject *Sender);
 
 private: // User declarations
-	void LoadCommPorts();
 	void RefreshProgressBar();
 	void ConnectSerialPort();
 	void DisconnectSerialPort();
@@ -56,6 +59,7 @@ public: // User declarations
 	void ClearChartSeries();
 	// Globais
 	SerialPort *FSerialPort;
+   unsigned int FChartXPos;
 };
 
 // ---------------------------------------------------------------------------

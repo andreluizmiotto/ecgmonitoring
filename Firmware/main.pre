@@ -1543,6 +1543,34 @@ extern char * ultoa(char * buf, unsigned long val, int base);
 
 extern char * ftoa(float f, int * status);
 
+# 30 "E:\Program Files (x86)\Microchip\xc8\v1.44\include\Math.h"
+extern double fabs(double);
+extern double floor(double);
+extern double ceil(double);
+extern double modf(double, double *);
+extern double sqrt(double);
+extern double atof(const char *);
+extern double sin(double) ;
+extern double cos(double) ;
+extern double tan(double) ;
+extern double asin(double) ;
+extern double acos(double) ;
+extern double atan(double);
+extern double atan2(double, double) ;
+extern double log(double);
+extern double log10(double);
+extern double pow(double, double) ;
+extern double exp(double) ;
+extern double sinh(double) ;
+extern double cosh(double) ;
+extern double tanh(double);
+extern double eval_poly(double, const double *, int);
+extern double frexp(double, int *);
+extern double ldexp(double, int);
+extern double fmod(double, double);
+extern double trunc(double);
+extern double round(double);
+
 # 4 "C:\Projects\BitBucketProjects\Firmwares e Supervisorios\AquisicaoSinaisECG\Firmware\usart.h"
 void USART_Init(long BaudRate);
 void USART_WriteChar(unsigned char USART_Data);
@@ -1559,9 +1587,16 @@ void TIMER0_Set(unsigned char count);
 void TIMER1_Init();
 void TIMER1_Set(unsigned int count);
 
-# 10 "C:\Projects\BitBucketProjects\Firmwares e Supervisorios\AquisicaoSinaisECG\Firmware\main.c"
+# 11 "C:\Projects\BitBucketProjects\Firmwares e Supervisorios\AquisicaoSinaisECG\Firmware\main.c"
 unsigned char ADC_Buffer[4];
-unsigned int codigo = 0;
+unsigned int CODIGO = 0;
+unsigned char HIGH;
+unsigned char LOW;
+
+float tempo_periodo = 0.002;
+float t = 0;
+float pi = 3.141592653589793;
+float valor = 0;
 
 void interrupt ISR(void)
 {
@@ -1570,32 +1605,37 @@ if(PIR1bits.TMR1IF)
 {
 PIR1bits.TMR1IF = 0;
 
-TIMER1_Set(42496);
-
-# 32
-ADC_Buffer[0] = ('#');
-ADC_Buffer[1] = ('$');
-ADC_Buffer[2] = (':');
-
-ADC_Buffer[3] = (codigo >> 8);
-ADC_Buffer[4] = codigo;
-
-codigo++;
-if (codigo > 1023)
-codigo = 0;
-
-ADC_Buffer[5] = (codigo >> 8);
-ADC_Buffer[6] = codigo;
-
-codigo++;
-if (codigo > 1023)
-codigo = 0;
 
 
+TIMER1_Set(7936);
+TIMER1_Set(56320);
 
+# 68
+valor = (sin(2 * pi * 10 * t) * 2.5) + 2.5;
+CODIGO = (valor * 1023)/5;
+ADC_Buffer[0] = (CODIGO >> 8);
+ADC_Buffer[1] = CODIGO;
 
-unsigned char checksum = 0x20;
-for(unsigned char index = 0; index < 7; index++)
+if (t < 0.998)
+t = t + tempo_periodo;
+else
+t = 0;
+
+valor = (sin(2 * pi * 10 * t) * 2.5) + 2.5;
+CODIGO = (valor * 1023)/5;
+ADC_Buffer[2] = (CODIGO >> 8);
+ADC_Buffer[3] = CODIGO;
+
+if (t < 0.998)
+t = t + tempo_periodo;
+else
+t = 0;
+
+USART_WriteChar('#');
+USART_WriteChar('$');
+USART_WriteChar(':');
+unsigned char checksum = 0x50;
+for(unsigned char index = 0; index <= 3; index++)
 {
 USART_WriteChar(ADC_Buffer[index]);
 checksum ^= ADC_Buffer[index];

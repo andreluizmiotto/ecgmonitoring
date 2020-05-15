@@ -9,25 +9,16 @@
 #include "Classes/ClassFFT.h"
 
 // ---------------------------------------------------------------------------
-class ThreadSerialBufferIn : public TThread {
-private:
-	std::string FSerialBuffer;
-	CArray FCH1SignalBuffer;
-	CArray FCH2SignalBuffer;
-	unsigned int FBufferIndex;
-	float FCH1SignalValue;
-	float FCH2SignalValue;
-	unsigned int FCount;
+class ThreadSerialBufferIn : public TThread
+{
+	protected:
+		void __fastcall Execute();
+		void __fastcall PlotCH1Signal();
+		void __fastcall PlotCH2Signal();
+		void __fastcall ClearSerialBuffer();
 
-protected:
-	void __fastcall Execute();
-	void __fastcall PlotCH1Signal();
-	void __fastcall PlotCH2Signal();
-	void __fastcall PlotCH1FFT();
-	void __fastcall ClearSerialBuffer();
-
-public:
-	__fastcall ThreadSerialBufferIn(bool CreateSuspended);
+	public:
+		__fastcall ThreadSerialBufferIn(bool CreateSuspended);
 };
 // ---------------------------------------------------------------------------
 #endif

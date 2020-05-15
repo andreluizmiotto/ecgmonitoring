@@ -10,7 +10,9 @@
  E:/Program\ Files\ (x86)/Microchip/xc8/v1.44/include/pic.h
  E:/Program\ Files\ (x86)/Microchip/xc8/v1.44/include/eeprom_routines.h
  E:/Program\ Files\ (x86)/Microchip/xc8/v1.44/include/cci.h
+ E:/Program\ Files\ (x86)/Microchip/xc8/v1.44/include/__unsupported.h
  E:/Program\ Files\ (x86)/Microchip/xc8/v1.44/include/pic_chip_select.h
+ E:/Program\ Files\ (x86)/Microchip/xc8/v1.44/include/Math.h
  E:/Program\ Files\ (x86)/Microchip/xc8/v1.44/include/stdlib.h
  C:/Projects/BitBucketProjects/Firmwares\ e\ Supervisorios/AquisicaoSinaisECG/Firmware/usart.h
  E:/Program\ Files\ (x86)/Microchip/xc8/v1.44/include/xc8debug.h

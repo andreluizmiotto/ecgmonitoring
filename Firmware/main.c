@@ -1,6 +1,7 @@
 #include "config.h"
 #include <xc.h>
 #include <stdlib.h>
+#include <Math.h>
 
 #include "usart.h"
 #include "adc.h"
@@ -8,7 +9,14 @@
 
 // Variáveis globais do sistema.
 unsigned char ADC_Buffer[4];
-unsigned int codigo = 0;
+unsigned int CODIGO = 0;
+unsigned char HIGH;
+unsigned char LOW;
+
+float tempo_periodo = 0.002; // Necessário configurar o TIMER para gerar interrupção a cada 2ms
+float t = 0;
+float pi = 3.141592653589793;
+float valor = 0;
 
 void interrupt ISR(void)
 {
@@ -17,7 +25,10 @@ void interrupt ISR(void)
 	{
         PIR1bits.TMR1IF = 0;		// Resetar a flag do TIMER1 para uma nova contagem.
 
-		TIMER1_Set(42496);   		// Frequência de amostragem de 250 Hz.
+		//TIMER1_Set(42496);   		// Frequência de amostragem de 250 Hz.
+		// Ajustar prescaler ao utilizar 250Hz -> 00
+		TIMER1_Set(7936); // 100 ms -> prescaler 1:8
+		TIMER1_Set(56320); // 500Hz
         
         // Leitura do canal AN0.
 /*		ADC_Read(0);
@@ -29,29 +40,56 @@ void interrupt ISR(void)
         ADC_Buffer[2] = ADRESH;
         ADC_Buffer[3] = ADRESL;
 */
-		ADC_Buffer[0] = ('#');
-		ADC_Buffer[1] = ('$');
-		ADC_Buffer[2] = (':');
-		
-		ADC_Buffer[3] = (codigo >> 8);
-        ADC_Buffer[4] = codigo;
 
-		codigo++;
-		if (codigo > 1023)
-			codigo = 0;
+// CODIGO DE TESTE - 0 a 1023 -----------------
+/*		HIGH = (CODIGO >> 8);
+		LOW = CODIGO;
 
-        ADC_Buffer[5] = (codigo >> 8);
-        ADC_Buffer[6] = codigo;
+		if (CODIGO < 1023)
+			CODIGO++;
+		else
+			CODIGO = 0;
 
-		codigo++;
-		if (codigo > 1023)
-			codigo = 0;
-		        
-		// Pacote de dados com as amostras coletadas.
-//        USART_WriteString("#$:");	// Inicializador do pacote de dados.
+		ADC_Buffer[0] = HIGH;
+        ADC_Buffer[1] = LOW;
 
-        unsigned char checksum = 0x20;
-        for(unsigned char index = 0; index < 7; index++) 
+		HIGH = (CODIGO >> 8);
+		LOW = CODIGO;
+
+		if (CODIGO < 1023)
+			CODIGO++;
+		else
+			CODIGO = 0;
+
+        ADC_Buffer[2] = HIGH;
+        ADC_Buffer[3] = LOW;
+*/
+// CODIGO DE TESTE - SENO -----------------
+		valor = (sin(2 * pi * 10 * t) * 2.5) + 2.5;
+		CODIGO = (valor * 1023)/5;
+		ADC_Buffer[0] = (CODIGO >> 8);
+		ADC_Buffer[1] = CODIGO;
+
+		if (t < 0.998)
+			t = t + tempo_periodo;
+		else
+			t = 0;
+
+		valor = (sin(2 * pi * 10 * t) * 2.5) + 2.5;
+		CODIGO = (valor * 1023)/5;
+		ADC_Buffer[2] = (CODIGO >> 8);
+		ADC_Buffer[3] = CODIGO;
+
+		if (t < 0.998)
+			t = t + tempo_periodo;
+		else
+			t = 0;
+
+		USART_WriteChar('#');
+		USART_WriteChar('$');
+		USART_WriteChar(':');
+        unsigned char checksum = 0x50;
+        for(unsigned char index = 0; index <= 3; index++) 
 		{
         	USART_WriteChar(ADC_Buffer[index]);
            	checksum ^= ADC_Buffer[index];
