@@ -16,7 +16,7 @@ class SerialPort
 		HANDLE hComm;
 
 		//Vetores Auxiliares
-		char Buffer[8096];
+		unsigned char Buffer[8096];
 		char Byte;
 
 		//Variáveis de Controle da Porta Serial.
@@ -38,8 +38,7 @@ class SerialPort
 
 		// Escrita e leitura do buffer de dados.
 		BOOL WriteABuffer(char *, DWORD);
-		char * ReadABuffer();
-		std::vector<unsigned char> ReadBuffer();
+		std::vector<unsigned char> ReadABuffer();
 
 		// Demais parâmetros de controle da porta serial.
 		std::vector<std::string>CheckSerialPort();

@@ -17,18 +17,30 @@ float FCH2SignalValue;
 
 // ---------------------------------------------------------------------------
 void __fastcall ThreadSerialBufferIn::PlotCH1Signal() {
-	frmPrincipal->lineSeriesSignal->AddXY(frmPrincipal->FChartXPos, FCH1SignalValue, "", clTeeColor);
+	frmPrincipal->lineSeriesSignal->BeginUpdate();
+	frmPrincipal->lineSeriesSignal->YValues->Value[frmPrincipal->FChartXPos] = FCH1SignalValue;
+	frmPrincipal->lineSeriesSignal->EndUpdate();
 	frmPrincipal->meSignal->Lines->Add(FCH1SignalValue);
-	frmPrincipal->meSignal->CaretPosition = TCaretPosition::Create(frmPrincipal->FChartXPos, 0);
+	frmPrincipal->meSignal->CaretPosition = TCaretPosition::Create(frmPrincipal->meSignal->Lines->Count, 0);
 	frmPrincipal->FChartXPos++;
+	if (frmPrincipal->FChartXPos > PLOT_WINDOW)
+		frmPrincipal->FChartXPos = 0;
+	frmPrincipal->lineSeriesSignal->Repaint();
+//	frmPrincipal->chartSignal->Repaint();
 }
 
 // ---------------------------------------------------------------------------
 void __fastcall ThreadSerialBufferIn::PlotCH2Signal() {
-	frmPrincipal->lineSeriesSignal->AddXY(frmPrincipal->FChartXPos, FCH2SignalValue, "", clTeeColor);
+	frmPrincipal->lineSeriesSignal->BeginUpdate();
+	frmPrincipal->lineSeriesSignal->YValues->Value[frmPrincipal->FChartXPos] = FCH2SignalValue;
+	frmPrincipal->lineSeriesSignal->EndUpdate();
 	frmPrincipal->meSignal->Lines->Add(FCH2SignalValue);
-	frmPrincipal->meSignal->CaretPosition = TCaretPosition::Create(frmPrincipal->FChartXPos, 0);
+	frmPrincipal->meSignal->CaretPosition = TCaretPosition::Create(frmPrincipal->meSignal->Lines->Count, 0);
 	frmPrincipal->FChartXPos++;
+	if (frmPrincipal->FChartXPos > PLOT_WINDOW)
+		frmPrincipal->FChartXPos = 0;
+	frmPrincipal->lineSeriesSignal->Repaint();
+//	frmPrincipal->chartSignal->Repaint();
 }
 
 // ---------------------------------------------------------------------------
@@ -51,9 +63,8 @@ void __fastcall ThreadSerialBufferIn::Execute() {
 	while (1) {
 		if (frmPrincipal->FSerialPort == NULL)
 			return;
-//		std::vector ABufferIn = frmPrincipal->FSerialPort->ReadBuffer();
-		Sleep(10);
-		FSerialBuffer.append(frmPrincipal->FSerialPort->ReadABuffer());
+		std::vector ABufferIn = frmPrincipal->FSerialPort->ReadABuffer();
+		FSerialBuffer.append(ABufferIn.begin(), ABufferIn.end());
 
 		if (FSerialBuffer.length() < 8)
 			continue;

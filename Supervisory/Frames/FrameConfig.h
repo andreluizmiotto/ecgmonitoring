@@ -13,6 +13,7 @@
 #include <FMX.Objects.hpp>
 #include <FMX.ImgList.hpp>
 #include <System.ImageList.hpp>
+#include <FMX.Layouts.hpp>
 //---------------------------------------------------------------------------
 class TfraConfig : public TFrame
 {
@@ -26,12 +27,18 @@ __published:	// IDE-managed Components
 	TSpeedButton *btnGoBack;
 	TSpeedButton *btnApply;
 	TImageList *imgListConfig;
+	TLayout *lytSerialPort;
+	TButton *btnRefresh;
 	void __fastcall btnGoBackClick(TObject *Sender);
+	void __fastcall btnRefreshClick(TObject *Sender);
 private:	// User declarations
 public:		// User declarations
 	__fastcall TfraConfig(TComponent* Owner);
 	void LoadComPorts();
-   void ShowPopup();
+	void ShowPopup();
+   void HidePopup();
+	AnsiString getSerialPort();
+	AnsiString getBaudrate();
 };
 //---------------------------------------------------------------------------
 extern PACKAGE TfraConfig *fraConfig;

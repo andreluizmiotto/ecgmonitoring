@@ -18,12 +18,17 @@ __fastcall TfraConfig::TfraConfig(TComponent* Owner)
 //---------------------------------------------------------------------------
 void __fastcall TfraConfig::btnGoBackClick(TObject *Sender)
 {
-	 this->Visible = false;
+	 this->HidePopup();
 }
 //---------------------------------------------------------------------------
 void TfraConfig::ShowPopup()
 {
 	this->Visible = true;
+}
+//---------------------------------------------------------------------------
+void TfraConfig::HidePopup()
+{
+	this->Visible = false;
 }
 //---------------------------------------------------------------------------
 void TfraConfig::LoadComPorts()
@@ -45,6 +50,26 @@ void TfraConfig::LoadComPorts()
 		cbbSerialPort->ItemIndex = 0;
 }
 //---------------------------------------------------------------------------
+AnsiString TfraConfig::getSerialPort()
+{
+	AnsiString AResult = EmptyAnsiStr;
+	if (cbbSerialPort->ItemIndex >= 0)
+		AResult = cbbSerialPort->Selected->Text;
+	return AResult;
+}
+//---------------------------------------------------------------------------
+AnsiString TfraConfig::getBaudrate()
+{
+	AnsiString AResult = EmptyAnsiStr;
+	if (cbbBaudrate->ItemIndex >= 0)
+		AResult = cbbBaudrate->Selected->Text;
+	return AResult;
+}
+//---------------------------------------------------------------------------
 
-
+void __fastcall TfraConfig::btnRefreshClick(TObject *Sender)
+{
+   this->LoadComPorts();
+}
+//---------------------------------------------------------------------------
 

@@ -46,11 +46,11 @@ __published: // IDE-managed Components
 	void __fastcall btnConnectClick(TObject *Sender);
 	void __fastcall btnDisconnectClick(TObject *Sender);
 	void __fastcall btnCleanChartClick(TObject *Sender);
-	void __fastcall FormShow(TObject *Sender);
 	void __fastcall btnConfigClick(TObject *Sender);
 	void __fastcall chartSignalAfterDraw(TObject *Sender);
 
 private: // User declarations
+	void ConfigChartSeries();
 	void RefreshProgressBar();
 	void ConnectSerialPort();
 	void DisconnectSerialPort();

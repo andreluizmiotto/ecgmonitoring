@@ -16,7 +16,7 @@ SerialPort::SerialPort() {
 	ByteSize = 8;
 
 	// Configuração dos tamanhos dos buffers de leitura e escrita.
-	dwToRead = 2048;
+	dwToRead = 8096;
 }
 // ---------------------------------------------------------------------------
 
@@ -27,8 +27,8 @@ static wchar_t* charToWChar(const char* text) {
 	return wText;
 }
 
-BOOL SerialPort::OpenSerialPort(System::AnsiString asPort,
-	System::AnsiString asBaudRate) {
+BOOL SerialPort::OpenSerialPort(System::AnsiString asPort, System::AnsiString asBaudRate) {
+
 	System::AnsiString asCommPort;
 
 	// Verifica se há uma porta serial ainda aberta caso exista ela é fechada.
@@ -69,102 +69,59 @@ BOOL SerialPort::OpenSerialPort(System::AnsiString asPort,
 
 	// Abertura da porta serial selecionada.
 	hComm = CreateFile(charToWChar(asCommPort.c_str()),
-		// ponteiro para a porta selecionada.
-		GENERIC_READ | GENERIC_WRITE, // Modo de acesso (escrita ou leitura).
-		0, // Não utilizado.
-		0, // Não utilizado.
-		CREATE_ALWAYS, // Como a porta será criada.
-		NULL, // Não utilizado.
-		0); // Não utilizado.
+							 GENERIC_READ | GENERIC_WRITE,
+							 0,      //  must be opened with exclusive-access
+							 NULL,   //  default security attributes
+							 OPEN_EXISTING, //  must use OPEN_EXISTING
+							 0,      //  not overlapped I/O
+							 NULL ); //  hTemplate must be NULL for comm devices
 
-	// Faz a verificação se a porta foi aberta corretamente.
-	if (hComm != INVALID_HANDLE_VALUE) {
-		// Configuração dos Timeouts da Porta Serial.
-		COMMTIMEOUTS CommTimeouts;
-
-		// Atribuição dos valores definidos para os Timeouts.
-		CommTimeouts.ReadIntervalTimeout = MAXDWORD;
-		CommTimeouts.ReadTotalTimeoutMultiplier = 0;
-		CommTimeouts.ReadTotalTimeoutConstant = 0;
-		CommTimeouts.WriteTotalTimeoutMultiplier = 0;
-		CommTimeouts.WriteTotalTimeoutConstant = 0;
-
-		// Verificação se os parâmetros de configuração foram aceitos.
-		if (SetCommTimeouts(hComm, &CommTimeouts) == 0) {
-			// ShowMessage("ERRO AO ALTERAR DADOS DE CONFIGURAÇÃO DA PORTA SERIAL" + asPort);
-			CloseHandle(hComm);
-			hComm = NULL;
-
-			return (false);
-		}
-
-		// Configurações dos parâmetros de funcionamento da Porta Serial.
-		DCB dcb = {0};
-
-		// Verificação se foi possível obter os parâmetros de configuração originais da Porta Serial.
-		if (GetCommState(hComm, &dcb) == 0) {
-			// ShowMessage("ERRO AO OBTER DADOS DE CONFIGURAÇÃO DA PORTA SERIAL" + asPort);
-			CloseHandle(hComm);
-			hComm = NULL;
-
-			// Sinaliza erro na abertura da porta serial.
-			return (false);
-		}
-
-		// Estrutura de configuração da porta serial.
-		dcb.DCBlength = sizeof(dcb); // sizeof(DCB)
-
-		// Atribuição dos parâmetros (DEFAULT) de configuração da Porta Serial.
-		dcb.BaudRate = BaudRate; // current baud rate
-		dcb.fBinary = true; // binary mode, no EOF check
-		dcb.fParity = true; // enable parity checking
-		dcb.ByteSize = 8; // number of bits/byte, 4-8
-		dcb.Parity = NOPARITY; // 0 - 4 = no, odd, even, mark, space
-		dcb.StopBits = ONESTOPBIT; // 0, 1, 2 = 1, 1.5, 2
-
-		// Demais parâmetros opcional.
-		dcb.fOutxCtsFlow = false; // CTS output flow control
-		dcb.fOutxDsrFlow = false; // DSR output flow control
-		dcb.fDtrControl = DTR_CONTROL_DISABLE; // DTR flow control type
-		dcb.fDsrSensitivity = false; // DSR sensitivity
-		dcb.fTXContinueOnXoff = false; // XOFF continues Tx            2
-		dcb.fOutX = false; // XON/XOFF out flow control
-		dcb.fInX = false; // XON/XOFF in flow control
-		dcb.fErrorChar = false; // enable error replacement     1
-		dcb.fNull = false; // enable null stripping
-		dcb.fRtsControl = RTS_CONTROL_DISABLE; // RTS flow control
-		dcb.fAbortOnError = false; // abort reads/writes on error
-		dcb.fDummy2 = false; // reserved                     1
-		dcb.XonLim = 0; // transmit XON threshold       1
-		dcb.XoffLim = 0; // transmit XOFF threshold      1
-		dcb.XonChar; // Tx and Rx XON character
-		dcb.XoffChar; // Tx and Rx XOFF character
-		dcb.ErrorChar; // error replacement character
-		dcb.EofChar; // end of input character
-		dcb.EvtChar; // received event character
-		// dcb.wReserved;                          // not currently used           1
-		dcb.wReserved1; // reserved; do not use
-
-		// Verificação se os parâmetros de configuração foram aceitos.
-		if (SetCommState(hComm, &dcb) == 0) {
-			// ShowMessage("ERRO AO ALTERAR DADOS DE CONFIGURAÇÃO DA PORTA SERIAL" + asPort);
-			CloseHandle(hComm);
-			hComm = NULL;
-
-			return (false);
-		}
+	// Verifica se a porta foi aberta corretamente.
+	if (hComm == INVALID_HANDLE_VALUE)
+	{
+		 //  Handle the error.
+		 printf ("CreateFile failed with error %d.\n", GetLastError());
+		 return (false);
 	}
-	else {
-		// ShowMessage("ERRO AO ABRIR A PORTA SERIAL" + asPort);
-		CloseHandle(hComm);
-		hComm = NULL;
 
+	//  Inicializa a estrutura DCB.
+	DCB dcb;
+	SecureZeroMemory(&dcb, sizeof(DCB));
+	dcb.DCBlength = sizeof(DCB);
+
+	BOOL fSuccess = GetCommState(hComm, &dcb);
+
+	if (!fSuccess)
+	{
+		//  Handle the error.
+		printf ("GetCommState failed with error %d.\n", GetLastError());
+		return (false);
+   }
+
+	//  Fill in some DCB values and set the com state:
+	dcb.BaudRate = BaudRate;     //  baud rate
+	dcb.ByteSize = ByteSize;     //  data size, xmit and rcv
+	dcb.Parity   = Parity;       //  parity bit
+	dcb.StopBits = StopBits;     //  stop bit
+
+	fSuccess = SetCommState(hComm, &dcb);
+
+   if (!fSuccess)
+   {
+      //  Handle the error.
+      printf ("SetCommState failed with error %d.\n", GetLastError());
+		return (false);
+   }
+
+   //  Get the comm config again.
+	fSuccess = GetCommState(hComm, &dcb);
+
+   if (!fSuccess)
+   {
+      //  Handle the error.
+      printf ("GetCommState failed with error %d.\n", GetLastError());
 		return (false);
 	}
-
-	// Descarta caracteres presentes na porta e termina processos pendentes de leitura e transmissão.
-	PurgeComm(hComm,
-		PURGE_TXABORT | PURGE_RXABORT | PURGE_TXCLEAR | PURGE_RXCLEAR);
 
 	return (true);
 }
@@ -203,92 +160,33 @@ BOOL SerialPort::WriteABuffer(char *Buffer, DWORD dwToWrite) {
 
 // ---------------------------------------------------------------------------
 
-char * SerialPort::ReadABuffer() {
-	OVERLAPPED osRead = {0};
-
-	if (hComm != NULL) {
-		// Create this writes OVERLAPPED structure hEvent.
-		osRead.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-
-		if (osRead.hEvent != NULL) {
-			memcpy(Buffer, "\x0", sizeof Buffer);
-			if (ReadFile(hComm, &Buffer, dwToRead, &dwRead, &osRead)) {
-				// Encerra corretamente a string para não retornar lixo.
-				Buffer[dwRead] = '\0';
-			}
-			else {
-				// ShowMessage("ERRO AO LER DADOS DA PORTA SERIAL");
-			}
-		}
-		else {
-			// ShowMessage("ERRO AO ABRIR A PORTA SERIAL");
-			CloseHandle(hComm);
-			return (FALSE);
-		}
-
-		CloseHandle(osRead.hEvent);
-	}
-	else {
-		// ShowMessage("ERRO AO ABRIR A PORTA SERIAL");
-		CloseHandle(hComm);
-		return (FALSE);
-	}
-
-	// Finaliza todas as pendências de escrita e leitura da porta serial selecionada.
-	PurgeComm(hComm,
-		PURGE_TXABORT | PURGE_RXABORT | PURGE_TXCLEAR | PURGE_RXCLEAR);
-
-	// Retorna o buffer recebido.
-	return (Buffer);
-}
-
-// ---------------------------------------------------------------------------
-
-std::vector<unsigned char> SerialPort::ReadBuffer()
+std::vector<unsigned char> SerialPort::ReadABuffer()
 {
-    std::vector <unsigned char> dest(256);
+	OVERLAPPED osRead = {0};
+	std::vector <unsigned char> ABuffer(8096);
 
-    OVERLAPPED osRead = {0};
-
-    if (hComm != NULL)
-    {
-        // Create this writes OVERLAPPED structure hEvent.
-        osRead.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-        if (osRead.hEvent != NULL)
-        {
-			strcpy(Buffer,"\x0");
-            if (ReadFile(hComm, &Buffer, dwToRead, &dwRead, &osRead))
-            {
-                //Encerra corretamente a string para não retornar lixo.
-                Buffer[dwRead] = '\0';
-                memcpy(&dest[0], &Buffer[0], dwRead*sizeof(char));
-            }
-            else
-            {
-//                ShowMessage("ERRO AO LER DADOS DA PORTA SERIAL");
-			}
-		}
-		else
-		{
-//            ShowMessage("ERRO AO ABRIR A PORTA SERIAL");
-			CloseHandle(hComm);
-			//return (FALSE);
-		}
-
-		CloseHandle(osRead.hEvent);
-	}
-	else
-	{
-//        ShowMessage("ERRO AO ABRIR A PORTA SERIAL");
+	if (hComm == NULL) {
 		CloseHandle(hComm);
-        //return (FALSE);
-    }
+		return ABuffer;
+	}
+	// Create this writes OVERLAPPED structure hEvent.
+	osRead.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (osRead.hEvent == NULL) {
+		CloseHandle(hComm);
+		return ABuffer;
+	}
 
-    //Finaliza todas as pendências de escrita e leitura da porta serial selecionada.
-    PurgeComm(hComm, PURGE_TXABORT | PURGE_RXABORT | PURGE_TXCLEAR | PURGE_RXCLEAR);
+	if (ReadFile(hComm, &Buffer, dwToRead, &dwRead, &osRead)) {
+		//Encerra corretamente a string para não retornar lixo.
+		Buffer[dwRead] = '\0';
+		memcpy(&ABuffer[0], &Buffer[0], dwRead*sizeof(char));
+	}
 
-    //Retorna o buffer recebido.
-    return (dest);
+	CloseHandle(osRead.hEvent);
+	//Finaliza todas as pendências de escrita e leitura da porta serial selecionada.
+	PurgeComm(hComm, PURGE_TXABORT | PURGE_RXABORT | PURGE_TXCLEAR | PURGE_RXCLEAR);
+
+	return (ABuffer);
 }
 
 //---------------------------------------------------------------------------
@@ -319,14 +217,15 @@ TStringList *SerialPort::LoadComPorts()
 	for(int i = 0; i < 50; i++) // Verifica portas de 0 a 50
 	{
 		String AComPort = "COM" + IntToStr(i);
-		DWORD ASuccess = QueryDosDevice(AComPort.c_str(), charToWChar((LPSTR)lpTargetPath), 5000);
+		try {
+			DWORD ASuccess = QueryDosDevice(AComPort.c_str(), lpTargetPath, 5000);
+			if(ASuccess!=0)
+				AComPorts->Add(AComPort);
 
-		if(ASuccess!=0)
-			AComPorts->Add(AComPort);
-
-		if(::GetLastError()==ERROR_INSUFFICIENT_BUFFER)
-		{
+			if(::GetLastError()==ERROR_INSUFFICIENT_BUFFER){ }
 		}
+		catch (const Exception& e)
+		{ }
 	}
 	return AComPorts;
 }
