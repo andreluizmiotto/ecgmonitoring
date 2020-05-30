@@ -9,20 +9,27 @@
 // ---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma link "FrameConfig"
+#pragma link "FrameChartView"
 #pragma resource "*.fmx"
 TfrmPrincipal *frmPrincipal;
+ThreadSerialBufferIn *FThreadSerialBuffer;
+bool FThreadRunning;
 
 // ---------------------------------------------------------------------------
 __fastcall TfrmPrincipal::TfrmPrincipal(TComponent* Owner) : TForm(Owner)
 {
 	this->tbcPrincipal->ActiveTab = this->tbiChart;
 	this->ConfigChartSeries();
-	fraConfig->LoadComPorts();
-   fraConfig->HidePopup();
+	fraConfig->Init(blurBackground);
+	fraChartView->Init(blurBackground);
 }
 //---------------------------------------------------------------------------
 void TfrmPrincipal::ConfigChartSeries()
 {
+	this->lineSeries->Clear();
+	this->meSignal->Lines->Clear();
+
+	/* Prepare chart for maximum speed */
 	this->chartSignal->ClipPoints = false;
 	this->chartSignal->Title->Visible = false;
 	this->chartSignal->Legend->Visible = false;
@@ -30,28 +37,39 @@ void TfrmPrincipal::ConfigChartSeries()
 	this->chartSignal->BottomAxis->Axis->Width = 1;
 	this->chartSignal->BottomAxis->RoundFirstLabel = false;
 	this->chartSignal->View3D = false;
-//	this->lineSeriesSignal->XValues->Order = loNone;
-//	this->lineSeriesSignal->FastPen = true;
 
-	this->ClearChartSeries();
+	unsigned int AFrequency = StrToIntDef(fraChartView->getFrequency(), 500);
+	unsigned int ATimeWindow = StrToIntDef(fraChartView->getTimeWindow(), 10);
+	unsigned int AMaxPoints = AFrequency * ATimeWindow;
+
+	this->chartSignal->AutoRepaint = false; // For "real-time" drawing mode
+	this->lineSeries->XValues->Order = loNone; // Increment speed when adding points
+
+	this->chartSignal->LeftAxis->SetMinMax(0, 1023);
+	this->chartSignal->BottomAxis->SetMinMax(0, AMaxPoints);
+
+	this->chartSignal->Axes->FastCalc = true;
 }
 //---------------------------------------------------------------------------
 void TfrmPrincipal::ConnectSerialPort()
 {
 	// Inicialização da porta serial.
-	if (FSerialPort != NULL)
-	{
-		DisconnectSerialPort();
+	if (FThreadRunning) {
+		ShowMessage("Thread running.");
 		return;
 	}
-
-	FSerialPort = new SerialPort();
+	SerialPort *vSerialPort = new SerialPort();
 	try
 	{
-		FSerialPort->OpenSerialPort(fraConfig->getSerialPort(), fraConfig->getBaudrate());
-		fraConfig->cbbSerialPort->Enabled = false;
-		fraConfig->cbbBaudrate->Enabled = false;
-		ThreadSerialBufferIn *AThreadSerialBufferIn = new ThreadSerialBufferIn(false);
+		bool AConnection = vSerialPort->OpenSerialPort(fraConfig->getSerialPort(), fraConfig->getBaudrate());
+		if (!AConnection) {
+			ShowMessage("Falha na conexão.");
+			return;
+		}
+		btnConfig->Enabled = false;
+		FThreadSerialBuffer = new ThreadSerialBufferIn(true, vSerialPort, chartSignal, lineSeries);
+		FThreadSerialBuffer->Resume(); // Run the thread
+		FThreadRunning = true;
 	}
 	__except(EXCEPTION_EXECUTE_HANDLER)
 	{
@@ -62,26 +80,13 @@ void TfrmPrincipal::ConnectSerialPort()
 //---------------------------------------------------------------------------
 void TfrmPrincipal::DisconnectSerialPort()
 {
-	if (FSerialPort == NULL)
+	if (!FThreadRunning)
 		return;
-	FSerialPort->CloseSerialPort();
-	FSerialPort = NULL;
-	delete FSerialPort;
-	fraConfig->cbbSerialPort->Enabled = true;
-	fraConfig->cbbBaudrate->Enabled = true;
-}
-//---------------------------------------------------------------------------
-void TfrmPrincipal::ClearChartSeries()
-{
-	this->lineSeriesSignal->Clear();
-	this->chartSignal->Axes->Left->Minimum = 0;
-	this->chartSignal->Axes->Left->Maximum = 1023;
-	this->chartSignal->Axes->Bottom->Minimum = 0;
-	this->chartSignal->Axes->Bottom->Maximum = PLOT_WINDOW;
-	for (unsigned int i = 0; i < PLOT_WINDOW+1; i++)
-		this->lineSeriesSignal->AddY(NULL);
-	this->FChartXPos = 0;
-	this->meSignal->Lines->Clear();
+	FThreadSerialBuffer->Terminate();
+	FThreadSerialBuffer = NULL;
+	delete FThreadSerialBuffer;
+	btnConfig->Enabled = true;
+	FThreadRunning = false;
 }
 //---------------------------------------------------------------------------
 void __fastcall TfrmPrincipal::btnConnectClick(TObject *Sender)
@@ -96,7 +101,7 @@ void __fastcall TfrmPrincipal::btnDisconnectClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TfrmPrincipal::btnCleanChartClick(TObject *Sender)
 {
-	ClearChartSeries();
+	ConfigChartSeries();
 }
 //---------------------------------------------------------------------------
 
@@ -106,29 +111,10 @@ void __fastcall TfrmPrincipal::btnConfigClick(TObject *Sender)
 }
 //---------------------------------------------------------------------------
 
-void __fastcall TfrmPrincipal::chartSignalAfterDraw(TObject *Sender)
+void __fastcall TfrmPrincipal::btnChartViewClick(TObject *Sender)
 {
-
-//	double xIni, xFin, yIni, yFin;
-//
-//	xIni = chartSignal->BottomAxis->CalcPosValue(FChartXPos - 1) - 8;
-//	yIni = chartSignal->LeftAxis->CalcPosValue(chartSignal->LeftAxis->Minimum) - 1;
-//	xFin = chartSignal->BottomAxis->CalcPosValue(FChartXPos - 1) + 8;
-//	yFin = chartSignal->LeftAxis->CalcPosValue(chartSignal->LeftAxis->Maximum) + 1;
-//
-//	if (xFin < chartSignal->BottomAxis->CalcPosValue(chartSignal->BottomAxis->Maximum)+8)
-//	{
-//		//Chart1->Canvas->Pen->Style = psSolid;
-//		//Chart1->Canvas->Pen->Color = clWhite;
-//		//Chart1->Canvas->Brush->Color = clWhite;
-//		//Chart1->Canvas->ReferenceCanvas->Pen->Color = clWhite/
-//		//Chart1->Canvas->Fill->Color = TAlphaColorRec::White;
-//
-////		lineSeriesCH1Signal->FastPen = true;
-//		chartSignal->Canvas->Rectangle(xIni, yIni, xFin, yFin); //->AssignBrushColor(clWhite)->;
-//		chartSignal->Canvas->ReferenceCanvas->Fill->Color = 0xFF3F3F3F;
-//		chartSignal->Canvas->ReferenceCanvas->Stroke->Color = 0xFF3F3F3F;
-//	}
+	fraChartView->ShowPopup();
 }
 //---------------------------------------------------------------------------
+
 

@@ -31,7 +31,7 @@ void interrupt ISR(void)
 		//TIMER1_Set(56320); // 500Hz
         
         // Leitura do canal AN0.
-/*		ADC_Read(0);
+		ADC_Read(0);
         ADC_Buffer[0] = ADRESH;
         ADC_Buffer[1] = ADRESL;
         
@@ -39,8 +39,8 @@ void interrupt ISR(void)
 		ADC_Read(1);
         ADC_Buffer[2] = ADRESH;
         ADC_Buffer[3] = ADRESL;
-*/
 
+/*
 // CODIGO DE TESTE - 0 a 1023 -----------------
 		HIGH = (CODIGO >> 8);
 		LOW = CODIGO;

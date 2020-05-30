@@ -11,9 +11,6 @@
 #include <FMX.StdCtrls.hpp>
 #include <FMX.Types.hpp>
 //---------------------------------------------------------------------------
-#include "Lib/Const.h"
-#include "Classes/ClassConexaoSerial.cpp"
-#include "Classes/ClassFFT.h"
 #include <FMX.TabControl.hpp>
 #include <FMX.ImgList.hpp>
 #include <System.ImageList.hpp>
@@ -24,11 +21,13 @@
 #include <FMXTee.Series.hpp>
 #include <FMX.Memo.hpp>
 #include <FMX.ScrollBox.hpp>
+#include "FrameChartView.h"
+#include <FMX.Effects.hpp>
+#include <FMX.Layouts.hpp>
 // ---------------------------------------------------------------------------
 class TfrmPrincipal : public TForm {
 __published: // IDE-managed Components
 	TMultiView *mvMenu;
-	TSpeedButton *btnConfig;
 	TSpeedButton *btnMenu;
 	TSpeedButton *btnDisconnect;
 	TSpeedButton *btnCleanChart;
@@ -39,27 +38,27 @@ __published: // IDE-managed Components
 	TTabItem *tbiChart;
 	TTabItem *tbiValues;
 	TImageList *ImageListMvMenu;
-	TChart *chartSignal;
-	TFastLineSeries *lineSeriesSignal;
 	TMemo *meSignal;
+	TSpeedButton *btnChartView;
+	TSpeedButton *btnConfig;
+	TBlurEffect *blurBackground;
+	TLayout *lytBackground;
 	TfraConfig *fraConfig;
+	TfraChartView *fraChartView;
+	TChart *chartSignal;
+	TFastLineSeries *lineSeries;
 	void __fastcall btnConnectClick(TObject *Sender);
 	void __fastcall btnDisconnectClick(TObject *Sender);
 	void __fastcall btnCleanChartClick(TObject *Sender);
 	void __fastcall btnConfigClick(TObject *Sender);
-	void __fastcall chartSignalAfterDraw(TObject *Sender);
+	void __fastcall btnChartViewClick(TObject *Sender);
 
 private: // User declarations
-	void ConfigChartSeries();
-	void RefreshProgressBar();
 	void ConnectSerialPort();
 	void DisconnectSerialPort();
 public: // User declarations
 	__fastcall TfrmPrincipal(TComponent* Owner);
-	void ClearChartSeries();
-	// Globais
-	SerialPort *FSerialPort;
-   unsigned int FChartXPos;
+	void ConfigChartSeries();
 };
 
 // ---------------------------------------------------------------------------

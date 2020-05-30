@@ -1607,28 +1607,15 @@ PIR1bits.TMR1IF = 0;
 
 TIMER1_Set(42496);
 
-# 45
-HIGH = (CODIGO >> 8);
-LOW = CODIGO;
+# 34
+ADC_Read(0);
+ADC_Buffer[0] = ADRESH;
+ADC_Buffer[1] = ADRESL;
 
-if (CODIGO < 1023)
-CODIGO++;
-else
-CODIGO = 0;
 
-ADC_Buffer[0] = HIGH;
-ADC_Buffer[1] = LOW;
-
-HIGH = (CODIGO >> 8);
-LOW = CODIGO;
-
-if (CODIGO < 1023)
-CODIGO++;
-else
-CODIGO = 0;
-
-ADC_Buffer[2] = HIGH;
-ADC_Buffer[3] = LOW;
+ADC_Read(1);
+ADC_Buffer[2] = ADRESH;
+ADC_Buffer[3] = ADRESL;
 
 # 88
 USART_WriteChar('#');

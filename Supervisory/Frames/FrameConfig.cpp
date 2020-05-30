@@ -21,14 +21,23 @@ void __fastcall TfraConfig::btnGoBackClick(TObject *Sender)
 	 this->HidePopup();
 }
 //---------------------------------------------------------------------------
+void TfraConfig::Init(TBlurEffect *blur)
+{
+	FBlur = blur;
+	HidePopup();
+   LoadComPorts();
+}
+//---------------------------------------------------------------------------
 void TfraConfig::ShowPopup()
 {
 	this->Visible = true;
+	FBlur->Enabled = true;
 }
 //---------------------------------------------------------------------------
 void TfraConfig::HidePopup()
 {
 	this->Visible = false;
+	FBlur->Enabled = false;
 }
 //---------------------------------------------------------------------------
 void TfraConfig::LoadComPorts()
@@ -61,8 +70,8 @@ AnsiString TfraConfig::getSerialPort()
 AnsiString TfraConfig::getBaudrate()
 {
 	AnsiString AResult = EmptyAnsiStr;
-	if (cbbBaudrate->ItemIndex >= 0)
-		AResult = cbbBaudrate->Selected->Text;
+	if (cbeBaudrate->ItemIndex >= 0)
+		AResult = cbeBaudrate->Text;
 	return AResult;
 }
 //---------------------------------------------------------------------------
@@ -70,6 +79,12 @@ AnsiString TfraConfig::getBaudrate()
 void __fastcall TfraConfig::btnRefreshClick(TObject *Sender)
 {
    this->LoadComPorts();
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TfraConfig::btnEditBaudrateClick(TObject *Sender)
+{
+   cbeBaudrate->SetFocus();
 }
 //---------------------------------------------------------------------------
 

@@ -1,53 +1,47 @@
 //---------------------------------------------------------------------------
 
-#ifndef FrameConfigH
-#define FrameConfigH
+#ifndef FrameChartViewH
+#define FrameChartViewH
 //---------------------------------------------------------------------------
 #include <System.Classes.hpp>
 #include <FMX.Controls.hpp>
 #include <FMX.Forms.hpp>
+#include <FMX.ComboEdit.hpp>
 #include <FMX.Controls.Presentation.hpp>
-#include <FMX.ListBox.hpp>
+#include <FMX.Edit.hpp>
+#include <FMX.ImgList.hpp>
+#include <FMX.Layouts.hpp>
 #include <FMX.StdCtrls.hpp>
 #include <FMX.Types.hpp>
-#include <FMX.Objects.hpp>
-#include <FMX.ImgList.hpp>
 #include <System.ImageList.hpp>
-#include <FMX.Layouts.hpp>
-#include <FMX.ComboEdit.hpp>
-#include <FMX.Edit.hpp>
 //---------------------------------------------------------------------------
-class TfraConfig : public TFrame
+class TfraChartView : public TFrame
 {
 __published:	// IDE-managed Components
-	TComboBox *cbbSerialPort;
-	TLabel *lblSerialPort;
-	TLabel *lblBaudrate;
-	TToolBar *tlbConfig;
+	TImageList *imgListChartView;
 	TPanel *pnlBackground;
+	TLabel *lblTimeWindow;
+	TLayout *lytTimeWindow;
+	TComboEdit *cbeTimeWindow;
+	TToolBar *tlbChartView;
 	TSpeedButton *btnGoBack;
 	TSpeedButton *btnApply;
-	TImageList *imgListConfig;
-	TLayout *lytSerialPort;
-	TButton *btnRefresh;
-	TLayout *lytBaudrate;
-	TButton *btnEditBaudrate;
-	TComboEdit *cbeBaudrate;
+	TLabel *lblFrequency;
+	TLayout *lytFrequency;
+	TComboEdit *cbeFrequency;
 	void __fastcall btnGoBackClick(TObject *Sender);
-	void __fastcall btnRefreshClick(TObject *Sender);
-	void __fastcall btnEditBaudrateClick(TObject *Sender);
 private:	// User declarations
 	TBlurEffect *FBlur;
 	void LoadComPorts();
 	void HidePopup();
 public:		// User declarations
-	__fastcall TfraConfig(TComponent* Owner);
+	__fastcall TfraChartView(TComponent* Owner);
 	void Init(TBlurEffect *blur);
 	void ShowPopup();
-	AnsiString getSerialPort();
-	AnsiString getBaudrate();
+	AnsiString getFrequency();
+	AnsiString getTimeWindow();
 };
 //---------------------------------------------------------------------------
-extern PACKAGE TfraConfig *fraConfig;
+extern PACKAGE TfraChartView *fraChartView;
 //---------------------------------------------------------------------------
 #endif

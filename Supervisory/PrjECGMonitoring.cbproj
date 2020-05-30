@@ -129,8 +129,12 @@
             <DependentOn>Classes\ClassConexaoSerial.h</DependentOn>
             <BuildOrder>4</BuildOrder>
         </CppCompile>
-        <CppCompile Include="Classes\ClassFFT.cpp">
-            <BuildOrder>5</BuildOrder>
+        <CppCompile Include="Frames\FrameChartView.cpp">
+            <Form>fraChartView</Form>
+            <FormType>fmx</FormType>
+            <DesignClass>TFrame</DesignClass>
+            <DependentOn>Frames\FrameChartView.h</DependentOn>
+            <BuildOrder>8</BuildOrder>
         </CppCompile>
         <CppCompile Include="Frames\FrameConfig.cpp">
             <Form>fraConfig</Form>
@@ -160,6 +164,7 @@
             <BuildOrder>7</BuildOrder>
         </CppCompile>
         <FormResources Include="Principal.fmx"/>
+        <FormResources Include="Frames\FrameChartView.fmx"/>
         <FormResources Include="Frames\FrameConfig.fmx"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
