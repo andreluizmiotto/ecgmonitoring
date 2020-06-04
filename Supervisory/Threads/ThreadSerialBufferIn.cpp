@@ -15,18 +15,35 @@ TFastLineSeries *lineSeries;
 float FCH1Value;
 float FCH2Value;
 unsigned int FCount;
+unsigned int FScrollPoints = 10;
 
 // ---------------------------------------------------------------------------
 void __fastcall ThreadSerialBufferIn::Update()
 {
 	lineSeries->BeginUpdate();
-	if (FCount >= chart->BottomAxis->Maximum - 1)
+	if (FCount >= chart->BottomAxis->Maximum - 1) {
 		FCount = 0;
-	lineSeries->AddXY(FCount++, FCH1Value);
-	lineSeries->AddXY(FCount++, FCH2Value);
+	}
+	lineSeries->Delete(FCount, FScrollPoints, True);
+//	lineSeries->AddXY(FCount++, FCH1Value);
+//	lineSeries->AddXY(FCount++, FCH2Value);
+	lineSeries->YValues->Value[FCount++] = FCH1Value;
+	lineSeries->YValues->Value[FCount++] = FCH2Value;
 	lineSeries->EndUpdate();
-	if (FCount % 10 == 0)
+//	if (FCount % 5 == 0)
 		chart->Repaint();
+
+
+
+//	double vTempMin, vTempMax;
+//	// Scroll horizontal bottom axis
+//	lineSeries->GetHorizAxis->SetMinMax(FCount - chart->BottomAxis->Maximum + FScrollPoints, FCount + FScrollPoints);
+//
+//	// Scroll vertical left axis
+//	vTempMin = lineSeries->YValues->MinValue;
+//	vTempMax = lineSeries->YValues->MaxValue;
+//
+//	lineSeries->GetVertAxis->SetMinMax(vTempMin - vTempMin/5, vTempMax + vTempMax/5);
 
 //   implementar delete series
 

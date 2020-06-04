@@ -4,6 +4,7 @@
 #pragma hdrstop
 
 #include "FrameChartView.h"
+#include "IniFiles.hpp"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.fmx"
@@ -17,7 +18,36 @@ __fastcall TfraChartView::TfraChartView(TComponent* Owner)
 void TfraChartView::Init(TBlurEffect *blur)
 {
 	FBlur = blur;
+	LoadDefaultValues();
 	HidePopup();
+}
+//---------------------------------------------------------------------------
+void TfraChartView::Save()
+{
+	TCustomIniFile *vIniFile = new TIniFile("./Config.ini");
+	try
+	{
+		vIniFile->WriteInteger("ChartView", "Frequency", this->cbeFrequency->ItemIndex);
+		vIniFile->WriteInteger("ChartView", "TimeWindow", this->cbeTimeWindow->ItemIndex);
+	}
+	catch(Exception* e)
+	{
+	}
+	delete vIniFile;
+}
+//---------------------------------------------------------------------------
+void TfraChartView::LoadDefaultValues()
+{
+	TCustomIniFile *vIniFile = new TIniFile("./Config.ini");
+	try
+	{
+		this->cbeFrequency->ItemIndex = vIniFile->ReadInteger("ChartView", "Frequency", 2);
+		this->cbeTimeWindow->ItemIndex = vIniFile->ReadInteger("ChartView", "TimeWindow", 2);
+	}
+	catch(Exception* e)
+	{
+	}
+	delete vIniFile;
 }
 //---------------------------------------------------------------------------
 void TfraChartView::ShowPopup()
@@ -34,7 +64,8 @@ void TfraChartView::HidePopup()
 //---------------------------------------------------------------------------
 void __fastcall TfraChartView::btnGoBackClick(TObject *Sender)
 {
-	 this->HidePopup();
+	LoadDefaultValues();
+	HidePopup();
 }
 //---------------------------------------------------------------------------
 AnsiString TfraChartView::getFrequency()
@@ -53,3 +84,10 @@ AnsiString TfraChartView::getTimeWindow()
 	return AResult;
 }
 //---------------------------------------------------------------------------
+void __fastcall TfraChartView::btnApplyClick(TObject *Sender)
+{
+	Save();
+	HidePopup();
+}
+//---------------------------------------------------------------------------
+

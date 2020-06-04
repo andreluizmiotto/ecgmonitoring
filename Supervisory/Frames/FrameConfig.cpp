@@ -4,6 +4,7 @@
 #pragma hdrstop
 
 #include "FrameConfig.h"
+#include "IniFiles.hpp"
 //---------------------------------------------------------------------------
 #include "Classes/ClassConexaoSerial.cpp"
 //---------------------------------------------------------------------------
@@ -18,14 +19,44 @@ __fastcall TfraConfig::TfraConfig(TComponent* Owner)
 //---------------------------------------------------------------------------
 void __fastcall TfraConfig::btnGoBackClick(TObject *Sender)
 {
-	 this->HidePopup();
+	LoadDefaultValues();
+	HidePopup();
 }
 //---------------------------------------------------------------------------
 void TfraConfig::Init(TBlurEffect *blur)
 {
 	FBlur = blur;
+	LoadComPorts();
+	LoadDefaultValues();
 	HidePopup();
-   LoadComPorts();
+}
+//---------------------------------------------------------------------------
+void TfraConfig::Save()
+{
+	TCustomIniFile *vIniFile = new TIniFile("./Config.ini");
+	try
+	{
+		vIniFile->WriteInteger("SerialComm", "SerialPort", this->cbbSerialPort->ItemIndex);
+		vIniFile->WriteInteger("SerialComm", "Baudrate", this->cbeBaudrate->ItemIndex);
+	}
+	catch(Exception* e)
+	{
+	}
+	delete vIniFile;
+}
+//---------------------------------------------------------------------------
+void TfraConfig::LoadDefaultValues()
+{
+	TCustomIniFile *vIniFile = new TIniFile("./Config.ini");
+	try
+	{
+		this->cbbSerialPort->ItemIndex = vIniFile->ReadInteger("SerialComm", "SerialPort", -1);
+		this->cbeBaudrate->ItemIndex = vIniFile->ReadInteger("SerialComm", "Baudrate", 4);
+	}
+	catch(Exception* e)
+	{
+	}
+	delete vIniFile;
 }
 //---------------------------------------------------------------------------
 void TfraConfig::ShowPopup()
@@ -85,6 +116,13 @@ void __fastcall TfraConfig::btnRefreshClick(TObject *Sender)
 void __fastcall TfraConfig::btnEditBaudrateClick(TObject *Sender)
 {
    cbeBaudrate->SetFocus();
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TfraConfig::btnApplyClick(TObject *Sender)
+{
+	Save();
+	HidePopup();
 }
 //---------------------------------------------------------------------------
 

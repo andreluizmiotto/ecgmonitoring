@@ -36,9 +36,12 @@ __published:	// IDE-managed Components
 	void __fastcall btnGoBackClick(TObject *Sender);
 	void __fastcall btnRefreshClick(TObject *Sender);
 	void __fastcall btnEditBaudrateClick(TObject *Sender);
+	void __fastcall btnApplyClick(TObject *Sender);
 private:	// User declarations
 	TBlurEffect *FBlur;
 	void LoadComPorts();
+	void LoadDefaultValues();
+	void Save();
 	void HidePopup();
 public:		// User declarations
 	__fastcall TfraConfig(TComponent* Owner);

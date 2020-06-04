@@ -49,13 +49,18 @@ void TfrmPrincipal::ConfigChartSeries()
 	this->chartSignal->BottomAxis->SetMinMax(0, AMaxPoints);
 
 	this->chartSignal->Axes->FastCalc = true;
+
+	for (unsigned int i = 0; i < AMaxPoints; i++)
+		this->lineSeries->AddY(0);
+
+   this->chartSignal->Repaint();
 }
 //---------------------------------------------------------------------------
 void TfrmPrincipal::ConnectSerialPort()
 {
 	// Inicialização da porta serial.
 	if (FThreadRunning) {
-		ShowMessage("Thread running.");
+		ShowMessage("Thread is already running.");
 		return;
 	}
 	SerialPort *vSerialPort = new SerialPort();

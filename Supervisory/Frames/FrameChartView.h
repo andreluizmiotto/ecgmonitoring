@@ -30,9 +30,12 @@ __published:	// IDE-managed Components
 	TLayout *lytFrequency;
 	TComboEdit *cbeFrequency;
 	void __fastcall btnGoBackClick(TObject *Sender);
+	void __fastcall btnApplyClick(TObject *Sender);
 private:	// User declarations
 	TBlurEffect *FBlur;
 	void LoadComPorts();
+	void LoadDefaultValues();
+   void Save();
 	void HidePopup();
 public:		// User declarations
 	__fastcall TfraChartView(TComponent* Owner);

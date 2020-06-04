@@ -31,7 +31,7 @@ void interrupt ISR(void)
 		//TIMER1_Set(56320); // 500Hz
         
         // Leitura do canal AN0.
-		ADC_Read(0);
+/*		ADC_Read(0);
         ADC_Buffer[0] = ADRESH;
         ADC_Buffer[1] = ADRESL;
         
@@ -40,7 +40,7 @@ void interrupt ISR(void)
         ADC_Buffer[2] = ADRESH;
         ADC_Buffer[3] = ADRESL;
 
-/*
+
 // CODIGO DE TESTE - 0 a 1023 -----------------
 		HIGH = (CODIGO >> 8);
 		LOW = CODIGO;
@@ -63,9 +63,9 @@ void interrupt ISR(void)
 
         ADC_Buffer[2] = HIGH;
         ADC_Buffer[3] = LOW;
-
+*/
 // CODIGO DE TESTE - SENO -----------------
-/*		valor = (sin(2 * pi * 10 * t) * 2.5) + 2.5;
+		valor = (sin(2 * pi * 20 * t) * 2.5) + 2.5;
 		CODIGO = (valor * 1023)/5;
 		ADC_Buffer[0] = (CODIGO >> 8);
 		ADC_Buffer[1] = CODIGO;
@@ -75,7 +75,7 @@ void interrupt ISR(void)
 		else
 			t = 0;
 
-		valor = (sin(2 * pi * 10 * t) * 2.5) + 2.5;
+		valor = (sin(2 * pi * 20 * t) * 2.5) + 2.5;
 		CODIGO = (valor * 1023)/5;
 		ADC_Buffer[2] = (CODIGO >> 8);
 		ADC_Buffer[3] = CODIGO;
@@ -84,7 +84,7 @@ void interrupt ISR(void)
 			t = t + tempo_periodo;
 		else
 			t = 0;
-*/
+
 		USART_WriteChar('#');
 		USART_WriteChar('$');
 		USART_WriteChar(':');

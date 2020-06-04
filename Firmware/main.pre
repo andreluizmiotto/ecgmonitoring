@@ -1607,17 +1607,27 @@ PIR1bits.TMR1IF = 0;
 
 TIMER1_Set(42496);
 
-# 34
-ADC_Read(0);
-ADC_Buffer[0] = ADRESH;
-ADC_Buffer[1] = ADRESL;
+# 68
+valor = (sin(2 * pi * 20 * t) * 2.5) + 2.5;
+CODIGO = (valor * 1023)/5;
+ADC_Buffer[0] = (CODIGO >> 8);
+ADC_Buffer[1] = CODIGO;
 
+if (t < 0.998)
+t = t + tempo_periodo;
+else
+t = 0;
 
-ADC_Read(1);
-ADC_Buffer[2] = ADRESH;
-ADC_Buffer[3] = ADRESL;
+valor = (sin(2 * pi * 20 * t) * 2.5) + 2.5;
+CODIGO = (valor * 1023)/5;
+ADC_Buffer[2] = (CODIGO >> 8);
+ADC_Buffer[3] = CODIGO;
 
-# 88
+if (t < 0.998)
+t = t + tempo_periodo;
+else
+t = 0;
+
 USART_WriteChar('#');
 USART_WriteChar('$');
 USART_WriteChar(':');

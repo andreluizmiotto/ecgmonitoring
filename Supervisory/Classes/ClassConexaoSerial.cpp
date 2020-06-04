@@ -80,7 +80,7 @@ BOOL SerialPort::OpenSerialPort(System::AnsiString asPort, System::AnsiString as
 	if (hComm == INVALID_HANDLE_VALUE)
 	{
 		 //  Handle the error.
-		 printf ("CreateFile failed with error %d.\n", GetLastError());
+		 printf ("CreateFile failed with error %lu.\n", GetLastError());
 		 return (false);
 	}
 
@@ -94,7 +94,7 @@ BOOL SerialPort::OpenSerialPort(System::AnsiString asPort, System::AnsiString as
 	if (!fSuccess)
 	{
 		//  Handle the error.
-		printf ("GetCommState failed with error %d.\n", GetLastError());
+		printf ("GetCommState failed with error %lu.\n", GetLastError());
 		return (false);
    }
 
@@ -109,7 +109,7 @@ BOOL SerialPort::OpenSerialPort(System::AnsiString asPort, System::AnsiString as
    if (!fSuccess)
    {
       //  Handle the error.
-      printf ("SetCommState failed with error %d.\n", GetLastError());
+		printf ("SetCommState failed with error %lu.\n", GetLastError());
 		return (false);
    }
 
@@ -119,7 +119,7 @@ BOOL SerialPort::OpenSerialPort(System::AnsiString asPort, System::AnsiString as
    if (!fSuccess)
    {
       //  Handle the error.
-      printf ("GetCommState failed with error %d.\n", GetLastError());
+		printf ("GetCommState failed with error %lu.\n", GetLastError());
 		return (false);
 	}
 
