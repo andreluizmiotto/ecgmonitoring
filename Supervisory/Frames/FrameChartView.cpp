@@ -71,7 +71,7 @@ void __fastcall TfraChartView::btnGoBackClick(TObject *Sender)
 AnsiString TfraChartView::getFrequency()
 {
 	AnsiString AResult = EmptyAnsiStr;
-	if (cbeFrequency->ItemIndex >= 0)
+	if ((cbeFrequency->ItemIndex >= 0) || (cbeFrequency->Text != EmptyAnsiStr))
 		AResult = cbeFrequency->Text;
 	return AResult;
 }
@@ -79,7 +79,7 @@ AnsiString TfraChartView::getFrequency()
 AnsiString TfraChartView::getTimeWindow()
 {
 	AnsiString AResult = EmptyAnsiStr;
-	if (cbeTimeWindow->ItemIndex >= 0)
+	if ((cbeTimeWindow->ItemIndex >= 0) || (cbeTimeWindow->Text != EmptyAnsiStr))
 		AResult = cbeTimeWindow->Text;
 	return AResult;
 }
@@ -90,4 +90,5 @@ void __fastcall TfraChartView::btnApplyClick(TObject *Sender)
 	HidePopup();
 }
 //---------------------------------------------------------------------------
+
 

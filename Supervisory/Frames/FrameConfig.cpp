@@ -101,7 +101,7 @@ AnsiString TfraConfig::getSerialPort()
 AnsiString TfraConfig::getBaudrate()
 {
 	AnsiString AResult = EmptyAnsiStr;
-	if (cbeBaudrate->ItemIndex >= 0)
+	if ((cbeBaudrate->ItemIndex >= 0) || (cbeBaudrate->Text != EmptyAnsiStr))
 		AResult = cbeBaudrate->Text;
 	return AResult;
 }

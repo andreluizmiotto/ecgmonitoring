@@ -24,6 +24,8 @@
 #include "FrameChartView.h"
 #include <FMX.Effects.hpp>
 #include <FMX.Layouts.hpp>
+#include <FMX.Dialogs.hpp>
+#include <FMX.Objects.hpp>
 // ---------------------------------------------------------------------------
 class TfrmPrincipal : public TForm {
 __published: // IDE-managed Components
@@ -47,18 +49,29 @@ __published: // IDE-managed Components
 	TfraChartView *fraChartView;
 	TChart *chartSignal;
 	TFastLineSeries *lineSeries;
+	TSpeedButton *btnOpenECGFile;
+	TOpenDialog *dlgOpenFile;
+	TLine *lnTopConfig;
+	TLine *lnBotSerial;
+	TLine *lnBotFile;
+	TLine *lnTopCleanChart;
+	TTimer *tmrRepaintChart;
 	void __fastcall btnConnectClick(TObject *Sender);
 	void __fastcall btnDisconnectClick(TObject *Sender);
 	void __fastcall btnCleanChartClick(TObject *Sender);
 	void __fastcall btnConfigClick(TObject *Sender);
 	void __fastcall btnChartViewClick(TObject *Sender);
-
+	void __fastcall btnOpenECGFileClick(TObject *Sender);
+	void __fastcall tmrRepaintChartTimer(TObject *Sender);
+	void __fastcall OnTerminateThread(TObject *Sender);
 private: // User declarations
-	void ConnectSerialPort();
-	void DisconnectSerialPort();
+	void StartSerialReading();
+	void CloseSerialPort();
+	void StartFilePlotting();
+	void CloseFile();
+	void ConfigChartSeries();
 public: // User declarations
 	__fastcall TfrmPrincipal(TComponent* Owner);
-	void ConfigChartSeries();
 };
 
 // ---------------------------------------------------------------------------

@@ -41,7 +41,6 @@ class SerialPort
 		std::vector<unsigned char> ReadABuffer();
 
 		// Demais parâmetros de controle da porta serial.
-		std::vector<std::string>CheckSerialPort();
 		void getSerialStatus();
 		unsigned int getBufferSize();
 		unsigned char getBufferData();

@@ -1598,6 +1598,8 @@ float t = 0;
 float pi = 3.141592653589793;
 float valor = 0;
 
+unsigned int tipoSinal = 0;
+
 void interrupt ISR(void)
 {
 
@@ -1605,32 +1607,36 @@ if(PIR1bits.TMR1IF)
 {
 PIR1bits.TMR1IF = 0;
 
-TIMER1_Set(42496);
+# 34
+TIMER1_Set(54016);
 
-# 68
-valor = (sin(2 * pi * 20 * t) * 2.5) + 2.5;
-CODIGO = (valor * 1023)/5;
-ADC_Buffer[0] = (CODIGO >> 8);
-ADC_Buffer[1] = CODIGO;
+# 51
+HIGH = (CODIGO >> 8);
+LOW = CODIGO;
 
-if (t < 0.998)
-t = t + tempo_periodo;
+if (CODIGO < 1023)
+CODIGO++;
 else
-t = 0;
+CODIGO = 0;
 
-valor = (sin(2 * pi * 20 * t) * 2.5) + 2.5;
-CODIGO = (valor * 1023)/5;
-ADC_Buffer[2] = (CODIGO >> 8);
-ADC_Buffer[3] = CODIGO;
+ADC_Buffer[0] = HIGH;
+ADC_Buffer[1] = LOW;
 
-if (t < 0.998)
-t = t + tempo_periodo;
+HIGH = (CODIGO >> 8);
+LOW = CODIGO;
+
+if (CODIGO < 1023)
+CODIGO++;
 else
-t = 0;
+CODIGO = 0;
 
+ADC_Buffer[2] = HIGH;
+ADC_Buffer[3] = LOW;
+
+# 94
+USART_WriteChar('@');
 USART_WriteChar('#');
 USART_WriteChar('$');
-USART_WriteChar(':');
 unsigned char checksum = 0x50;
 for(unsigned char index = 0; index <= 3; index++)
 {
@@ -1658,13 +1664,11 @@ TIMER1_Init();
 ADC_Init();
 
 
-TIMER1_Set(42496);
+TIMER1_Set(54016);
 
 
 INTCONbits.PEIE = 1;
 INTCONbits.GIE = 1;
-
-USART_WriteString("Inicializando USART...");
 
 while(1)
 {

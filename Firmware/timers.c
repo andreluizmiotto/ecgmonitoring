@@ -7,7 +7,7 @@ void TIMER0_Init()
 {
 	OPTION_REGbits.T0CS = 0;
 	OPTION_REGbits.T0SE = 0;
-	OPTION_REGbits.PSA  = 0;
+	OPTION_REGbits.PSA  = 0;	// Prescaler on TIMER0
 	OPTION_REGbits.PS2  = 1;	// Prescaler 111 = 256.
 	OPTION_REGbits.PS1  = 1;
 	OPTION_REGbits.PS0  = 1;

@@ -123,11 +123,15 @@
         <Icns_MainIcns>PrjECGMonitoring_Icns1.icns</Icns_MainIcns>
         <UWP_CppLogo44>Icons\Pulsação44p.png</UWP_CppLogo44>
         <UWP_CppLogo150>Icons\Pulsação100p.png</UWP_CppLogo150>
+        <LinkPackageImports>rtl.bpi;fmx.bpi;FMXTee.bpi;vcl.bpi</LinkPackageImports>
     </PropertyGroup>
     <ItemGroup>
         <CppCompile Include="Classes\ClassConexaoSerial.cpp">
             <DependentOn>Classes\ClassConexaoSerial.h</DependentOn>
             <BuildOrder>4</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="Classes\ClassFFT.cpp">
+            <BuildOrder>9</BuildOrder>
         </CppCompile>
         <CppCompile Include="Frames\FrameChartView.cpp">
             <Form>fraChartView</Form>
@@ -158,6 +162,10 @@
         </PCHCompile>
         <CppCompile Include="PrjECGMonitoring.cpp">
             <BuildOrder>0</BuildOrder>
+        </CppCompile>
+        <CppCompile Include="Threads\ThreadFilePlotting.cpp">
+            <DependentOn>Threads\ThreadFilePlotting.h</DependentOn>
+            <BuildOrder>8</BuildOrder>
         </CppCompile>
         <CppCompile Include="Threads\ThreadSerialBufferIn.cpp">
             <DependentOn>Threads\ThreadSerialBufferIn.h</DependentOn>
