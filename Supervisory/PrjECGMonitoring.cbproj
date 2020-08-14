@@ -126,6 +126,10 @@
         <LinkPackageImports>rtl.bpi;fmx.bpi;FMXTee.bpi;vcl.bpi</LinkPackageImports>
     </PropertyGroup>
     <ItemGroup>
+        <CppCompile Include="Classes\ClassChartPlot.cpp">
+            <DependentOn>Classes\ClassChartPlot.h</DependentOn>
+            <BuildOrder>10</BuildOrder>
+        </CppCompile>
         <CppCompile Include="Classes\ClassConexaoSerial.cpp">
             <DependentOn>Classes\ClassConexaoSerial.h</DependentOn>
             <BuildOrder>4</BuildOrder>

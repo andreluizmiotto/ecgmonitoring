@@ -23,6 +23,8 @@ bool FThreadRunning;
 // ---------------------------------------------------------------------------
 __fastcall TfrmPrincipal::TfrmPrincipal(TComponent* Owner) : TForm(Owner)
 {
+	this->ClientWidth = 1280 + this->mvMenu->Width;
+	this->ClientHeight = 720 + this->tbiChart->Height;
 	this->tbcPrincipal->ActiveTab = this->tbiChart;
 	fraConfig->Init(blurBackground);
 	fraChartView->Init(blurBackground);
@@ -31,8 +33,8 @@ __fastcall TfrmPrincipal::TfrmPrincipal(TComponent* Owner) : TForm(Owner)
 //---------------------------------------------------------------------------
 void TfrmPrincipal::ConfigChartSeries()
 {
-	this->lineSeries->Clear();
-	this->meSignal->Lines->Clear();
+//	this->lineSeries->Clear();
+//	this->meSignal->Lines->Clear();
 
 	/* Prepare chart for maximum speed */
 //	this->chartSignal->ClipPoints = false;
@@ -43,22 +45,42 @@ void TfrmPrincipal::ConfigChartSeries()
 //	this->chartSignal->BottomAxis->RoundFirstLabel = false;
 //	this->chartSignal->View3D = false;
 
-	unsigned int AFrequency = 720;//StrToIntDef(fraChartView->getFrequency(), 400);
-	unsigned int ATimeWindow = 10;//StrToIntDef(fraChartView->getTimeWindow(), 5);
+	unsigned int AFrequency = StrToIntDef(fraChartView->getFrequency(), 400);
+	unsigned int ATimeWindow = StrToIntDef(fraChartView->getTimeWindow(), 5);
 	unsigned int AMaxPoints = AFrequency * ATimeWindow;
+
+	pltChart->Canvas->Stroke->Thickness = 3;
+	pltChart->Canvas->Stroke->Color = claLime;
 
 //	this->chartSignal->AutoRepaint = false; // For "real-time" drawing mode
 //	this->lineSeries->XValues->Order = loNone; // Increment speed when adding points
 
-	this->chartSignal->LeftAxis->SetMinMax(-2, 2);
-	this->chartSignal->BottomAxis->SetMinMax(0, AMaxPoints);
+//	this->chartSignal->LeftAxis->SetMinMax(-2, 2);
+//	this->chartSignal->BottomAxis->SetMinMax(0, AMaxPoints);
 
 //	this->chartSignal->Axes->FastCalc = true;
 
-	for (unsigned int i = 0; i < AMaxPoints; i++)
-		this->lineSeries->AddY(0);
+//	for (unsigned int i = 0; i < AMaxPoints; i++)
+//		this->lineSeries->AddY(0);
+//
+//	this->chartSignal->Repaint();
+}
+//---------------------------------------------------------------------------
+ChartPlot * TfrmPrincipal::NewChartPlotObj()
+{
+	ChartPlot *vChartPlot = new ChartPlot(pltChart->Canvas);
+	vChartPlot->SetInitialX(this->mvMenu->Width);
+	vChartPlot->SetInitialY((this->pltChart->Height/2) + this->tbiChart->Height);
+	vChartPlot->SetScreenSize(this->pltChart->Width, this->pltChart->Height);
 
-	this->chartSignal->Repaint();
+	unsigned int AFrequency = StrToIntDef(fraChartView->getFrequency(), 400);
+	unsigned int ATimeWindow = StrToIntDef(fraChartView->getTimeWindow(), 5);
+	double AMaxPoints = AFrequency * ATimeWindow;
+	vChartPlot->SetXMax(AMaxPoints);
+   vChartPlot->SetDownsamplingRate(10);
+
+	vChartPlot->Prepare();
+	return vChartPlot;
 }
 //---------------------------------------------------------------------------
 void TfrmPrincipal::StartSerialReading()
@@ -77,8 +99,7 @@ void TfrmPrincipal::StartSerialReading()
 			return;
 		}
 		btnConfig->Enabled = false;
-		this->tmrRepaintChart->Enabled = true;
-		FThreadSerialBuffer = new ThreadSerialBufferIn(true, vSerialPort, chartSignal, lineSeries, meSignal);
+		FThreadSerialBuffer = new ThreadSerialBufferIn(true, vSerialPort, NewChartPlotObj(), meSignal);
 		FThreadSerialBuffer->Resume(); // Run the thread
 		FThreadRunning = true;
 	}
@@ -93,7 +114,6 @@ void TfrmPrincipal::CloseSerialPort()
 {
 	if (!FThreadRunning)
 		return;
-	this->tmrRepaintChart->Enabled = false;
 	FThreadSerialBuffer->Terminate();
 	FThreadSerialBuffer = NULL;
 	delete FThreadSerialBuffer;
@@ -116,8 +136,7 @@ void TfrmPrincipal::StartFilePlotting()
 	try
 	{
 		btnConfig->Enabled = false;
-		this->tmrRepaintChart->Enabled = true;
-		FThreadFilePlotting = new TThreadFilePlotting(true, dlgOpenFile->FileName, chartSignal, lineSeries, meSignal);
+		FThreadFilePlotting = new TThreadFilePlotting(true, dlgOpenFile->FileName, NewChartPlotObj(), meSignal);
 		FThreadFilePlotting->Resume(); // Run the thread
 		FThreadFilePlotting->OnTerminate = OnTerminateThread;
 		FThreadRunning = true;
@@ -138,7 +157,6 @@ void TfrmPrincipal::CloseFile()
 {
 	if (!FThreadRunning)
 		return;
-	this->tmrRepaintChart->Enabled = false;
 	FThreadFilePlotting->Terminate();
 	FThreadFilePlotting = NULL;
 	delete FThreadFilePlotting;
@@ -180,10 +198,3 @@ void __fastcall TfrmPrincipal::btnOpenECGFileClick(TObject *Sender)
 	StartFilePlotting();
 }
 //---------------------------------------------------------------------------
-
-void __fastcall TfrmPrincipal::tmrRepaintChartTimer(TObject *Sender)
-{
-	this->chartSignal->Repaint();
-}
-//---------------------------------------------------------------------------
-

@@ -4,12 +4,11 @@
 #define ThreadSerialBufferInH
 // ---------------------------------------------------------------------------
 #include <System.Classes.hpp>
-#include <FMXTee.Chart.hpp>
-#include <FMXTee.Series.hpp>
 #include <FMX.Memo.hpp>
 // ---------------------------------------------------------------------------
 #include <string>
-#include "Classes/ClassConexaoSerial.cpp"
+#include "Classes/ClassConexaoSerial.h"
+#include "Classes/ClassChartPlot.h"
 // ---------------------------------------------------------------------------
 class ThreadSerialBufferIn : public TThread
 {
@@ -19,7 +18,7 @@ class ThreadSerialBufferIn : public TThread
 	private:
 		void DeleteInvalidPackage(std::string *PSerialBuffer);
 	public:
-		__fastcall ThreadSerialBufferIn(bool CreateSuspended, SerialPort *PSerialPort, TChart *PChart, TFastLineSeries *PLineSeries, TMemo *PMeSignal);
+		__fastcall ThreadSerialBufferIn(bool CreateSuspended, SerialPort *PSerialPort, ChartPlot *PChartPlot, TMemo *PMeSignal);
 };
 // ---------------------------------------------------------------------------
 #endif

@@ -10,8 +10,7 @@
 #include <fstream>
 // ---------------------------------------------------------------------------
 SerialPort *serialPort;
-TChart *chart;
-TFastLineSeries *lineSeries;
+ChartPlot *chartPlot;
 TMemo *meSignal;
 float FCH1Sample;
 float FCH2Sample;
@@ -20,18 +19,18 @@ unsigned int FCount;
 // ---------------------------------------------------------------------------
 void __fastcall ThreadSerialBufferIn::Update()
 {
-	lineSeries->BeginUpdate();
-	if (FCount >= chart->BottomAxis->Maximum - 1) {
-		FCount = 0;
-	}
+//	lineSeries->BeginUpdate();
+//	if (FCount >= chart->BottomAxis->Maximum - 1) {
+//		FCount = 0;
+//	}
 
 //	if (FCount % 2 == 0) {
-		lineSeries->YValues->Value[FCount++] = FCH1Sample;
+//		lineSeries->YValues->Value[FCount++] = FCH1Sample;
 //	} else
-		lineSeries->YValues->Value[FCount++] = FCH2Sample;
+//		lineSeries->YValues->Value[FCount++] = FCH2Sample;
 
 //	FCount++;
-	lineSeries->EndUpdate();
+//	lineSeries->EndUpdate();
 //	chart->Repaint();
 
 	meSignal->Lines->Add(FCH1Sample);
@@ -40,11 +39,10 @@ void __fastcall ThreadSerialBufferIn::Update()
 }
 
 // ---------------------------------------------------------------------------
-__fastcall ThreadSerialBufferIn::ThreadSerialBufferIn(bool CreateSuspended, SerialPort *PSerialPort, TChart *PChart, TFastLineSeries *PLineSeries, TMemo *PMeSignal)
+__fastcall ThreadSerialBufferIn::ThreadSerialBufferIn(bool CreateSuspended, SerialPort *PSerialPort, ChartPlot *PChartPlot, TMemo *PMeSignal)
 	: TThread(CreateSuspended) {
 	serialPort = PSerialPort;
-	chart = PChart;
-	lineSeries = PLineSeries;
+	chartPlot = PChartPlot;
 	meSignal = PMeSignal;
 	FreeOnTerminate = True; // don't need to cleanup after terminate
 	Priority = tpTimeCritical;  // max priority

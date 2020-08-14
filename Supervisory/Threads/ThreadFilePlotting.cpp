@@ -7,35 +7,27 @@
 #pragma package(smart_init)
 //---------------------------------------------------------------------------
 std::ifstream ecgFile;
-TChart *chart;
-TFastLineSeries *lineSeries;
+ChartPlot *chartPlot;
 TMemo *meSignal;
 float FSignal;
 unsigned int FCount;
+double xPixels, yPixels, FResolution;
 
 // ---------------------------------------------------------------------------
 void __fastcall TThreadFilePlotting::Update()
 {
-	lineSeries->BeginUpdate();
-	if (FCount >= chart->BottomAxis->Maximum - 1) {
-		FCount = 0;
-	}
-
-	lineSeries->YValues->Value[FCount++] = FSignal;
-	lineSeries->EndUpdate();
-//	chart->Repaint();
+   chartPlot->Plot(FSignal);
 
 	meSignal->Lines->Add(FSignal);
 	meSignal->CaretPosition = TCaretPosition::Create(meSignal->Lines->Count, 0);
 }
 
 // ---------------------------------------------------------------------------
-__fastcall TThreadFilePlotting::TThreadFilePlotting(bool CreateSuspended, AnsiString PFileName, TChart *PChart, TFastLineSeries *PLineSeries, TMemo *PMeSignal)
+__fastcall TThreadFilePlotting::TThreadFilePlotting(bool CreateSuspended, AnsiString PFileName, ChartPlot *PChartPlot, TMemo *PMeSignal)
 	: TThread(CreateSuspended)
 {
 	ecgFile.open(PFileName.c_str(), std::fstream::in);
-	chart = PChart;
-	lineSeries = PLineSeries;
+	chartPlot = PChartPlot;
 	meSignal = PMeSignal;
 	FreeOnTerminate = True; // don't need to cleanup after terminate
 	Priority = tpTimeCritical;  // max priority

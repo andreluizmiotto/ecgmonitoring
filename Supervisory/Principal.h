@@ -15,10 +15,6 @@
 #include <FMX.ImgList.hpp>
 #include <System.ImageList.hpp>
 #include "FrameConfig.h"
-#include <FMXTee.Chart.hpp>
-#include <FMXTee.Engine.hpp>
-#include <FMXTee.Procs.hpp>
-#include <FMXTee.Series.hpp>
 #include <FMX.Memo.hpp>
 #include <FMX.ScrollBox.hpp>
 #include "FrameChartView.h"
@@ -26,6 +22,8 @@
 #include <FMX.Layouts.hpp>
 #include <FMX.Dialogs.hpp>
 #include <FMX.Objects.hpp>
+#include <FMX.ExtCtrls.hpp>
+#include <ClassChartPlot.h>
 // ---------------------------------------------------------------------------
 class TfrmPrincipal : public TForm {
 __published: // IDE-managed Components
@@ -47,22 +45,19 @@ __published: // IDE-managed Components
 	TLayout *lytBackground;
 	TfraConfig *fraConfig;
 	TfraChartView *fraChartView;
-	TChart *chartSignal;
-	TFastLineSeries *lineSeries;
 	TSpeedButton *btnOpenECGFile;
 	TOpenDialog *dlgOpenFile;
 	TLine *lnTopConfig;
 	TLine *lnBotSerial;
 	TLine *lnBotFile;
 	TLine *lnTopCleanChart;
-	TTimer *tmrRepaintChart;
+	TPlotGrid *pltChart;
 	void __fastcall btnConnectClick(TObject *Sender);
 	void __fastcall btnDisconnectClick(TObject *Sender);
 	void __fastcall btnCleanChartClick(TObject *Sender);
 	void __fastcall btnConfigClick(TObject *Sender);
 	void __fastcall btnChartViewClick(TObject *Sender);
 	void __fastcall btnOpenECGFileClick(TObject *Sender);
-	void __fastcall tmrRepaintChartTimer(TObject *Sender);
 	void __fastcall OnTerminateThread(TObject *Sender);
 private: // User declarations
 	void StartSerialReading();
@@ -70,6 +65,7 @@ private: // User declarations
 	void StartFilePlotting();
 	void CloseFile();
 	void ConfigChartSeries();
+   ChartPlot * NewChartPlotObj();
 public: // User declarations
 	__fastcall TfrmPrincipal(TComponent* Owner);
 };
