@@ -3,47 +3,28 @@
 #include <System.hpp>
 #pragma hdrstop
 
-#include "ThreadSerialBufferIn.h"
 #pragma package(smart_init)
 // ---------------------------------------------------------------------------
 #include <iostream>
 #include <fstream>
+#include "ThreadSerialBufferIn.h"
 // ---------------------------------------------------------------------------
 SerialPort *serialPort;
-ChartPlot *chartPlot;
-TMemo *meSignal;
 float FCH1Sample;
 float FCH2Sample;
-unsigned int FCount;
 
 // ---------------------------------------------------------------------------
 void __fastcall ThreadSerialBufferIn::Update()
 {
-//	lineSeries->BeginUpdate();
-//	if (FCount >= chart->BottomAxis->Maximum - 1) {
-//		FCount = 0;
-//	}
-
-//	if (FCount % 2 == 0) {
-//		lineSeries->YValues->Value[FCount++] = FCH1Sample;
-//	} else
-//		lineSeries->YValues->Value[FCount++] = FCH2Sample;
-
-//	FCount++;
-//	lineSeries->EndUpdate();
-//	chart->Repaint();
-
-	meSignal->Lines->Add(FCH1Sample);
-	meSignal->Lines->Add(FCH2Sample);
-	meSignal->CaretPosition = TCaretPosition::Create(meSignal->Lines->Count, 0);
+	chartPlot->Plot(FCH1Sample);
+//   chartPlot->Plot(FCH2Sample);
 }
 
 // ---------------------------------------------------------------------------
-__fastcall ThreadSerialBufferIn::ThreadSerialBufferIn(bool CreateSuspended, SerialPort *PSerialPort, ChartPlot *PChartPlot, TMemo *PMeSignal)
+__fastcall ThreadSerialBufferIn::ThreadSerialBufferIn(bool CreateSuspended, SerialPort *PSerialPort, ChartPlot *PChartPlot)
 	: TThread(CreateSuspended) {
 	serialPort = PSerialPort;
 	chartPlot = PChartPlot;
-	meSignal = PMeSignal;
 	FreeOnTerminate = True; // don't need to cleanup after terminate
 	Priority = tpTimeCritical;  // max priority
 }
@@ -52,6 +33,7 @@ __fastcall ThreadSerialBufferIn::ThreadSerialBufferIn(bool CreateSuspended, Seri
 void __fastcall ThreadSerialBufferIn::Execute() {
 	std::string vBuffer;
 	std::ofstream vFile;
+	int vPacketLenght = 6;
 
 	vFile.open("Signal.txt", std::fstream::out | std::fstream::app);
 
@@ -60,15 +42,13 @@ void __fastcall ThreadSerialBufferIn::Execute() {
 		std::vector vSerialBuffer = serialPort->ReadABuffer();
 		vBuffer.append(vSerialBuffer.begin(), vSerialBuffer.end());
 
-		if (vBuffer.length() < 8)
+		if (vBuffer.length() < vPacketLenght)
 			continue;
 
 		// Verifica o cabeçalho do primeiro pacote do buffer.
 		if ((vBuffer.at(0) == '@') && (vBuffer.at(1) == '#') && (vBuffer.at(2) == '$')) {
 
-			std::string vPackageList;
-
-			while (vBuffer.size() >= 8) {
+			while (vBuffer.size() >= vPacketLenght) {
 				// Remove pacotes inválidos/corrompidos
 				if ((vBuffer.at(0) != '@') || (vBuffer.at(1) != '#') || (vBuffer.at(2) != '$')) {
 					DeleteInvalidPackage(&vBuffer);
@@ -76,31 +56,24 @@ void __fastcall ThreadSerialBufferIn::Execute() {
 				}
 
 				// Extrai do buffer o pacote de interesse (primeiro da fila).
-				std::string vPackage = vBuffer.substr(0, 8);
-				vBuffer.erase(0, 8);
+				std::string vPackage = vBuffer.substr(0, vPacketLenght);
+				vBuffer.erase(0, vPacketLenght);
 
 				// Verificação de checksum para validar a integridade do pacote.
 				unsigned char vChecksum = 0x50;
-				for (int index = 3; index <= 6; index++)
+				for (int index = 3; index <= vPacketLenght-2; index++)
 					vChecksum ^= (unsigned char)vPackage.at(index);
 
-				if (vChecksum == (unsigned char)vPackage.at(7))
-					vPackageList.append(vPackage);
-			}
-
-			if (vPackageList.size()) {
-				for (int index = 8; index <= vPackageList.size(); index += 8) {
-					std::string vSample = vPackageList.substr(index - 8, index);
-
+				if (vChecksum == (unsigned char)vPackage.at(vPacketLenght-1)) {
 					// Reconstrói as amostras em valores inteiros.
-					FCH1Sample = ((unsigned char)(vSample.at(3)) << 8 | (unsigned char)(vSample.at(4)));
-					FCH2Sample = ((unsigned char)(vSample.at(5)) << 8 | (unsigned char)(vSample.at(6)));
+					FCH1Sample = ((unsigned char)(vPackage.at(3)) << 8 | (unsigned char)(vPackage.at(4)));
+//					FCH2Sample = (((unsigned char)(vPackage.at(5)) << 8 | (unsigned char)(vPackage.at(6)))* 0.00488758553274)/0.01;
 
 					// Insere as amostras no gráfico
 					Synchronize(&Update);
 
 					// Grava as amostras em arquivo.
-					vFile << FCH1Sample << "\n" << FCH2Sample << "\n";
+					vFile << FCH1Sample << "\n";// << FCH2Sample << "\n";
 				}
 			}
 		}

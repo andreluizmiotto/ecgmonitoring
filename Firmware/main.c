@@ -27,24 +27,25 @@ void interrupt ISR(void)
 	{
         PIR1bits.TMR1IF = 0;		// Resetar a flag do TIMER1 para uma nova contagem.
 
-		// TIMER1_Set(42496);   		// Frequência de amostragem de 250 Hz.
+		TIMER1_Set(42496);   		// Frequência de amostragem de 250 Hz.
 		// Ajustar prescaler ao utilizar 250Hz -> 00
 		//TIMER1_Set(7936); // 100 ms -> prescaler 1:8
 		//TIMER1_Set(56320); // 500Hz
-		TIMER1_Set(54016); // 400Hz
+		//TIMER1_Set(54016); // 400Hz
 		//TIMER1_Set(50178); // 300Hz
 		//TIMER1_Set(0); // 70Hz
-
+/*
         
         // Leitura do canal AN0.
-/*		ADC_Read(0);
+		ADC_Read(0);
+
         ADC_Buffer[0] = ADRESH;
         ADC_Buffer[1] = ADRESL;
         
         // Leitura do canal AN1.
-		ADC_Read(1);
-        ADC_Buffer[2] = ADRESH;
-        ADC_Buffer[3] = ADRESL;
+	//	ADC_Read(0);
+    //    ADC_Buffer[2] = ADRESH;
+    //    ADC_Buffer[3] = ADRESL;
 
 */
 // CODIGO DE TESTE - 0 a 1023 -----------------
@@ -59,7 +60,7 @@ void interrupt ISR(void)
 		ADC_Buffer[0] = HIGH;
         ADC_Buffer[1] = LOW;
 
-		HIGH = (CODIGO >> 8);
+/*		HIGH = (CODIGO >> 8);
 		LOW = CODIGO;
 
 		if (CODIGO < 1023)
@@ -95,7 +96,7 @@ void interrupt ISR(void)
 		USART_WriteChar('#');
 		USART_WriteChar('$');
         unsigned char checksum = 0x50;
-        for(unsigned char index = 0; index <= 3; index++) 
+        for(unsigned char index = 0; index <= 1; index++) 
 		{
         	USART_WriteChar(ADC_Buffer[index]);
            	checksum ^= ADC_Buffer[index];
@@ -108,9 +109,9 @@ void interrupt ISR(void)
 void main(void)
 {
 	// Inicialização das portas do microcontrolador.
-    TRISA	= 0b00000011;	// Configuração dos canais analógicos do PORTA.
-    PORTA	= 0b00000011;  	// Inicialização dos canais analógicos do PORTA.
-    TRISB	= 0b00000000;	// Configuração das entradas/saídas do PORTB.
+    TRISA	= 0b00000001;	// Configuração dos canais analógicos do PORTA.
+    PORTA	= 0b00000001;  	// Inicialização dos canais analógicos do PORTA.
+    TRISB	= 0b00110000;	// Configuração das entradas/saídas do PORTB.
     PORTB	= 0b00000000;  	// Inicialização das entradas/saídas do PORTB.
 	TRISC	= 0b10000000;	// Configuração das entradas/saídas do PORTC.
     PORTC	= 0b11000000;  	// Inicialização das entradas/saídas do PORTC.

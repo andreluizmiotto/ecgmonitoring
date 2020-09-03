@@ -1607,10 +1607,9 @@ if(PIR1bits.TMR1IF)
 {
 PIR1bits.TMR1IF = 0;
 
-# 34
-TIMER1_Set(54016);
+TIMER1_Set(42496);
 
-# 51
+# 52
 HIGH = (CODIGO >> 8);
 LOW = CODIGO;
 
@@ -1622,23 +1621,12 @@ CODIGO = 0;
 ADC_Buffer[0] = HIGH;
 ADC_Buffer[1] = LOW;
 
-HIGH = (CODIGO >> 8);
-LOW = CODIGO;
-
-if (CODIGO < 1023)
-CODIGO++;
-else
-CODIGO = 0;
-
-ADC_Buffer[2] = HIGH;
-ADC_Buffer[3] = LOW;
-
-# 94
+# 95
 USART_WriteChar('@');
 USART_WriteChar('#');
 USART_WriteChar('$');
 unsigned char checksum = 0x50;
-for(unsigned char index = 0; index <= 3; index++)
+for(unsigned char index = 0; index <= 1; index++)
 {
 USART_WriteChar(ADC_Buffer[index]);
 checksum ^= ADC_Buffer[index];
@@ -1651,9 +1639,9 @@ USART_WriteChar(checksum);
 void main(void)
 {
 
-TRISA = 0b00000011;
-PORTA = 0b00000011;
-TRISB = 0b00000000;
+TRISA = 0b00000001;
+PORTA = 0b00000001;
+TRISB = 0b00110000;
 PORTB = 0b00000000;
 TRISC = 0b10000000;
 PORTC = 0b11000000;

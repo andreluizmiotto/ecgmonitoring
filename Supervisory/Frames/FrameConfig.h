@@ -45,7 +45,7 @@ private:	// User declarations
 	void HidePopup();
 public:		// User declarations
 	__fastcall TfraConfig(TComponent* Owner);
-	void Init(TBlurEffect *blur);
+	void Init(TBlurEffect *blur, void (*PCallback)());
 	void ShowPopup();
 	AnsiString getSerialPort();
 	AnsiString getBaudrate();

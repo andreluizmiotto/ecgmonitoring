@@ -8,8 +8,8 @@
 #include <System.StartUpCopy.hpp>
 //---------------------------------------------------------------------------
 USEFORM("Principal.cpp", frmPrincipal);
-USEFORM("Frames\FrameChartView.cpp", fraChartView); /* TFrame: File Type */
 USEFORM("Frames\FrameConfig.cpp", fraConfig); /* TFrame: File Type */
+USEFORM("Frames\FrameChartView.cpp", fraChartView); /* TFrame: File Type */
 //---------------------------------------------------------------------------
 extern "C" int FMXmain()
 {

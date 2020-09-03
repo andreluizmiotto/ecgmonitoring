@@ -4,7 +4,6 @@
 #define ThreadFilePlottingH
 //---------------------------------------------------------------------------
 #include <System.Classes.hpp>
-#include <FMX.Memo.hpp>
 // ---------------------------------------------------------------------------
 #include <iostream>
 #include <fstream>
@@ -18,7 +17,8 @@ protected:
 	void __fastcall Execute();
 	void __fastcall Update();
 public:
-	__fastcall TThreadFilePlotting(bool CreateSuspended, AnsiString PFileName, ChartPlot *PChartPlot, TMemo *PMeSignal);
+	__fastcall TThreadFilePlotting(bool CreateSuspended, AnsiString PFileName, ChartPlot *PChartPlot);
+   ChartPlot *chartPlot;
 };
 //---------------------------------------------------------------------------
 #endif

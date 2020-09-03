@@ -29,8 +29,10 @@ class SerialPort
 		BYTE ByteSize;
 
 	public:
-		// Construtor da classe SerialPort.
+		// Constructor da classe SerialPort.
 		SerialPort();
+		// Destructor da classe SerialPort.
+		~SerialPort();
 
 		// Abertura e fechamento da porta serial.
 		BOOL OpenSerialPort(System::AnsiString, System::AnsiString);

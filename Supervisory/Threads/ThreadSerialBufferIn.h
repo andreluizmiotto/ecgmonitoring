@@ -4,7 +4,6 @@
 #define ThreadSerialBufferInH
 // ---------------------------------------------------------------------------
 #include <System.Classes.hpp>
-#include <FMX.Memo.hpp>
 // ---------------------------------------------------------------------------
 #include <string>
 #include "Classes/ClassConexaoSerial.h"
@@ -18,7 +17,8 @@ class ThreadSerialBufferIn : public TThread
 	private:
 		void DeleteInvalidPackage(std::string *PSerialBuffer);
 	public:
-		__fastcall ThreadSerialBufferIn(bool CreateSuspended, SerialPort *PSerialPort, ChartPlot *PChartPlot, TMemo *PMeSignal);
+		__fastcall ThreadSerialBufferIn(bool CreateSuspended, SerialPort *PSerialPort, ChartPlot *PChartPlot);
+		ChartPlot *chartPlot;
 };
 // ---------------------------------------------------------------------------
 #endif

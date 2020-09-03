@@ -5,7 +5,7 @@
         <FrameworkType>FMX</FrameworkType>
         <MainSource>PrjECGMonitoring.cpp</MainSource>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Release</Config>
+        <Config Condition="'$(Config)'==''">Debug</Config>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <TargetedPlatforms>1</TargetedPlatforms>
         <AppType>Application</AppType>
@@ -134,8 +134,13 @@
             <DependentOn>Classes\ClassConexaoSerial.h</DependentOn>
             <BuildOrder>4</BuildOrder>
         </CppCompile>
+        <CppCompile Include="Classes\ClassDigitalFilter.cpp">
+            <DependentOn>Classes\ClassDigitalFilter.h</DependentOn>
+            <BuildOrder>12</BuildOrder>
+        </CppCompile>
         <CppCompile Include="Classes\ClassFFT.cpp">
-            <BuildOrder>9</BuildOrder>
+            <DependentOn>Classes\ClassFFT.h</DependentOn>
+            <BuildOrder>12</BuildOrder>
         </CppCompile>
         <CppCompile Include="Frames\FrameChartView.cpp">
             <Form>fraChartView</Form>
@@ -153,6 +158,9 @@
         </CppCompile>
         <None Include="Lib\Const.h">
             <BuildOrder>6</BuildOrder>
+        </None>
+        <None Include="Lib\Utils.h">
+            <BuildOrder>11</BuildOrder>
         </None>
         <CppCompile Include="Principal.cpp">
             <Form>frmPrincipal</Form>
@@ -176,8 +184,8 @@
             <BuildOrder>7</BuildOrder>
         </CppCompile>
         <FormResources Include="Principal.fmx"/>
-        <FormResources Include="Frames\FrameChartView.fmx"/>
         <FormResources Include="Frames\FrameConfig.fmx"/>
+        <FormResources Include="Frames\FrameChartView.fmx"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>

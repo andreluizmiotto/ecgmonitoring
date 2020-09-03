@@ -24,6 +24,7 @@
 #include <FMX.Objects.hpp>
 #include <FMX.ExtCtrls.hpp>
 #include <ClassChartPlot.h>
+#include "Lib/Utils.h"
 // ---------------------------------------------------------------------------
 class TfrmPrincipal : public TForm {
 __published: // IDE-managed Components
@@ -33,16 +34,10 @@ __published: // IDE-managed Components
 	TSpeedButton *btnCleanChart;
 	TSpeedButton *btnConnect;
 	TStyleBook *StyleBookPrincipal;
-	TPanel *pBackground;
-	TTabControl *tbcPrincipal;
-	TTabItem *tbiChart;
-	TTabItem *tbiValues;
 	TImageList *ImageListMvMenu;
-	TMemo *meSignal;
 	TSpeedButton *btnChartView;
 	TSpeedButton *btnConfig;
 	TBlurEffect *blurBackground;
-	TLayout *lytBackground;
 	TfraConfig *fraConfig;
 	TfraChartView *fraChartView;
 	TSpeedButton *btnOpenECGFile;
@@ -51,7 +46,9 @@ __published: // IDE-managed Components
 	TLine *lnBotSerial;
 	TLine *lnBotFile;
 	TLine *lnTopCleanChart;
-	TPlotGrid *pltChart;
+	TLayout *lytBackground;
+	TImage *pltChart;
+	TPlotGrid *pltGrid;
 	void __fastcall btnConnectClick(TObject *Sender);
 	void __fastcall btnDisconnectClick(TObject *Sender);
 	void __fastcall btnCleanChartClick(TObject *Sender);
@@ -59,13 +56,13 @@ __published: // IDE-managed Components
 	void __fastcall btnChartViewClick(TObject *Sender);
 	void __fastcall btnOpenECGFileClick(TObject *Sender);
 	void __fastcall OnTerminateThread(TObject *Sender);
+	void __fastcall FormResize(TObject *Sender);
 private: // User declarations
 	void StartSerialReading();
 	void CloseSerialPort();
 	void StartFilePlotting();
 	void CloseFile();
-	void ConfigChartSeries();
-   ChartPlot * NewChartPlotObj();
+	ChartPlot * NewChartPlotObj();
 public: // User declarations
 	__fastcall TfrmPrincipal(TComponent* Owner);
 };

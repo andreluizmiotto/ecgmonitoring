@@ -14,6 +14,7 @@
 #include <FMX.StdCtrls.hpp>
 #include <FMX.Types.hpp>
 #include <System.ImageList.hpp>
+#include "Lib/Utils.h"
 //---------------------------------------------------------------------------
 class TfraChartView : public TFrame
 {
@@ -35,11 +36,11 @@ private:	// User declarations
 	TBlurEffect *FBlur;
 	void LoadComPorts();
 	void LoadDefaultValues();
-   void Save();
+	void Save();
 	void HidePopup();
 public:		// User declarations
 	__fastcall TfraChartView(TComponent* Owner);
-	void Init(TBlurEffect *blur);
+	void Init(TBlurEffect *blur, void (*f)());
 	void ShowPopup();
 	AnsiString getFrequency();
 	AnsiString getTimeWindow();

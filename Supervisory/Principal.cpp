@@ -20,66 +20,51 @@ ThreadSerialBufferIn *FThreadSerialBuffer;
 TThreadFilePlotting *FThreadFilePlotting;
 bool FThreadRunning;
 
+//---------------------------------------------------------------------------
+void UpdateConfig()
+{
+	int ASamplingRate = StrToIntDef(frmPrincipal->fraChartView->getFrequency(), 400);
+	int ATimeWindow = StrToIntDef(frmPrincipal->fraChartView->getTimeWindow(), 5);
+	frmPrincipal->pltGrid->Frequency = frmPrincipal->pltGrid->Width/(5*ATimeWindow);
+	frmPrincipal->pltChart->Bitmap->Resize(frmPrincipal->pltChart->Width, frmPrincipal->pltChart->Height);
+	if (!FThreadRunning)
+		return;
+	if (FThreadFilePlotting != NULL) {
+		FThreadFilePlotting->chartPlot->SetScreenSize(frmPrincipal->pltChart->Width, frmPrincipal->pltChart->Height);
+		FThreadFilePlotting->chartPlot->SetSamplingRate(ASamplingRate);
+		FThreadFilePlotting->chartPlot->SetTimeWindow(ATimeWindow);
+		FThreadFilePlotting->chartPlot->Rewind();
+	}
+	if (FThreadSerialBuffer != NULL) {
+		FThreadSerialBuffer->chartPlot->SetScreenSize(frmPrincipal->pltChart->Width, frmPrincipal->pltChart->Height);
+		FThreadSerialBuffer->chartPlot->SetSamplingRate(ASamplingRate);
+		FThreadSerialBuffer->chartPlot->SetTimeWindow(ATimeWindow);
+		FThreadSerialBuffer->chartPlot->Rewind();
+	}
+}
 // ---------------------------------------------------------------------------
 __fastcall TfrmPrincipal::TfrmPrincipal(TComponent* Owner) : TForm(Owner)
 {
-	this->ClientWidth = 1280 + this->mvMenu->Width;
-	this->ClientHeight = 720 + this->tbiChart->Height;
-	this->tbcPrincipal->ActiveTab = this->tbiChart;
-	fraConfig->Init(blurBackground);
-	fraChartView->Init(blurBackground);
-	this->ConfigChartSeries();
-}
-//---------------------------------------------------------------------------
-void TfrmPrincipal::ConfigChartSeries()
-{
-//	this->lineSeries->Clear();
-//	this->meSignal->Lines->Clear();
-
-	/* Prepare chart for maximum speed */
-//	this->chartSignal->ClipPoints = false;
-//	this->chartSignal->Title->Visible = false;
-//	this->chartSignal->Legend->Visible = false;
-//	this->chartSignal->LeftAxis->Axis->Width = 1;
-//	this->chartSignal->BottomAxis->Axis->Width = 1;
-//	this->chartSignal->BottomAxis->RoundFirstLabel = false;
-//	this->chartSignal->View3D = false;
-
-	unsigned int AFrequency = StrToIntDef(fraChartView->getFrequency(), 400);
-	unsigned int ATimeWindow = StrToIntDef(fraChartView->getTimeWindow(), 5);
-	unsigned int AMaxPoints = AFrequency * ATimeWindow;
-
-	pltChart->Canvas->Stroke->Thickness = 3;
-	pltChart->Canvas->Stroke->Color = claLime;
-
-//	this->chartSignal->AutoRepaint = false; // For "real-time" drawing mode
-//	this->lineSeries->XValues->Order = loNone; // Increment speed when adding points
-
-//	this->chartSignal->LeftAxis->SetMinMax(-2, 2);
-//	this->chartSignal->BottomAxis->SetMinMax(0, AMaxPoints);
-
-//	this->chartSignal->Axes->FastCalc = true;
-
-//	for (unsigned int i = 0; i < AMaxPoints; i++)
-//		this->lineSeries->AddY(0);
-//
-//	this->chartSignal->Repaint();
+	this->ClientWidth = 1600;
+	this->ClientHeight = 900;
+	this->fraConfig->Init(blurBackground, &UpdateConfig);
+	this->fraChartView->Init(blurBackground, &UpdateConfig);
+	this->pltChart->Bitmap = new TBitmap(frmPrincipal->pltChart->Width, frmPrincipal->pltChart->Height);
 }
 //---------------------------------------------------------------------------
 ChartPlot * TfrmPrincipal::NewChartPlotObj()
 {
-	ChartPlot *vChartPlot = new ChartPlot(pltChart->Canvas);
-	vChartPlot->SetInitialX(this->mvMenu->Width);
-	vChartPlot->SetInitialY((this->pltChart->Height/2) + this->tbiChart->Height);
+	ChartPlot *vChartPlot = new ChartPlot(pltChart->Bitmap->Canvas);
+	vChartPlot->SetInitialX(0);
+	vChartPlot->SetInitialY(this->pltChart->Height/2);
 	vChartPlot->SetScreenSize(this->pltChart->Width, this->pltChart->Height);
+	vChartPlot->SetYRange(-4, 4);
+	vChartPlot->SetSamplingRate(StrToIntDef(fraChartView->getFrequency(), 400));
+	vChartPlot->SetTimeWindow(StrToIntDef(fraChartView->getTimeWindow(), 5));
+	vChartPlot->SetDownsamplingRate(5);
+	vChartPlot->EnableMovingAverage(5);
 
-	unsigned int AFrequency = StrToIntDef(fraChartView->getFrequency(), 400);
-	unsigned int ATimeWindow = StrToIntDef(fraChartView->getTimeWindow(), 5);
-	double AMaxPoints = AFrequency * ATimeWindow;
-	vChartPlot->SetXMax(AMaxPoints);
-   vChartPlot->SetDownsamplingRate(10);
-
-	vChartPlot->Prepare();
+	vChartPlot->Rewind();
 	return vChartPlot;
 }
 //---------------------------------------------------------------------------
@@ -99,8 +84,8 @@ void TfrmPrincipal::StartSerialReading()
 			return;
 		}
 		btnConfig->Enabled = false;
-		FThreadSerialBuffer = new ThreadSerialBufferIn(true, vSerialPort, NewChartPlotObj(), meSignal);
-		FThreadSerialBuffer->Resume(); // Run the thread
+		FThreadSerialBuffer = new ThreadSerialBufferIn(true, vSerialPort, NewChartPlotObj());
+		FThreadSerialBuffer->Start(); // Run the thread
 		FThreadRunning = true;
 	}
 	__except(EXCEPTION_EXECUTE_HANDLER)
@@ -136,8 +121,8 @@ void TfrmPrincipal::StartFilePlotting()
 	try
 	{
 		btnConfig->Enabled = false;
-		FThreadFilePlotting = new TThreadFilePlotting(true, dlgOpenFile->FileName, NewChartPlotObj(), meSignal);
-		FThreadFilePlotting->Resume(); // Run the thread
+		FThreadFilePlotting = new TThreadFilePlotting(true, dlgOpenFile->FileName, NewChartPlotObj());
+		FThreadFilePlotting->Start(); // Run the thread
 		FThreadFilePlotting->OnTerminate = OnTerminateThread;
 		FThreadRunning = true;
 	}
@@ -160,7 +145,7 @@ void TfrmPrincipal::CloseFile()
 	FThreadFilePlotting->Terminate();
 	FThreadFilePlotting = NULL;
 	delete FThreadFilePlotting;
-	btnConfig->Enabled = true;
+	this->btnConfig->Enabled = true;
 	FThreadRunning = false;
 }
 //---------------------------------------------------------------------------
@@ -176,25 +161,29 @@ void __fastcall TfrmPrincipal::btnDisconnectClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TfrmPrincipal::btnCleanChartClick(TObject *Sender)
 {
-	ConfigChartSeries();
+   this->pltChart->Repaint();
 }
 //---------------------------------------------------------------------------
-
 void __fastcall TfrmPrincipal::btnConfigClick(TObject *Sender)
 {
 	fraConfig->ShowPopup();
 }
 //---------------------------------------------------------------------------
-
 void __fastcall TfrmPrincipal::btnChartViewClick(TObject *Sender)
 {
 	fraChartView->ShowPopup();
 }
 //---------------------------------------------------------------------------
-
-
 void __fastcall TfrmPrincipal::btnOpenECGFileClick(TObject *Sender)
 {
 	StartFilePlotting();
 }
 //---------------------------------------------------------------------------
+
+void __fastcall TfrmPrincipal::FormResize(TObject *Sender)
+{
+	UpdateConfig();
+}
+//---------------------------------------------------------------------------
+
+

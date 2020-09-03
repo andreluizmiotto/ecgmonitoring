@@ -5,7 +5,8 @@
 #pragma package(smart_init)
 
 // ---------------------------------------------------------------------------
-SerialPort::SerialPort() {
+SerialPort::SerialPort()
+{
 	// Variável que que receberá a porta serial aberta.
 	hComm = NULL;
 
@@ -19,16 +20,22 @@ SerialPort::SerialPort() {
 	dwToRead = 8096;
 }
 // ---------------------------------------------------------------------------
+SerialPort::~SerialPort()
+{
 
-static wchar_t* charToWChar(const char* text) {
+}
+// ---------------------------------------------------------------------------
+
+static wchar_t* charToWChar(const char* text)
+{
 	const size_t size = strlen(text) + 1;
 	wchar_t* wText = new wchar_t[size];
 	mbstowcs(wText, text, size);
 	return wText;
 }
 
-BOOL SerialPort::OpenSerialPort(System::AnsiString asPort, System::AnsiString asBaudRate) {
-
+BOOL SerialPort::OpenSerialPort(System::AnsiString asPort, System::AnsiString asBaudRate)
+{
 	System::AnsiString asCommPort;
 
 	// Verifica se há uma porta serial ainda aberta caso exista ela é fechada.
@@ -96,7 +103,7 @@ BOOL SerialPort::OpenSerialPort(System::AnsiString asPort, System::AnsiString as
 		//  Handle the error.
 		printf ("GetCommState failed with error %lu.\n", GetLastError());
 		return (false);
-   }
+	}
 
 	//  Fill in some DCB values and set the com state:
 	dcb.BaudRate = BaudRate;     //  baud rate
@@ -106,19 +113,19 @@ BOOL SerialPort::OpenSerialPort(System::AnsiString asPort, System::AnsiString as
 
 	fSuccess = SetCommState(hComm, &dcb);
 
-   if (!fSuccess)
-   {
-      //  Handle the error.
+	if (!fSuccess)
+	{
+		//  Handle the error.
 		printf ("SetCommState failed with error %lu.\n", GetLastError());
 		return (false);
-   }
+	}
 
-   //  Get the comm config again.
+	//  Get the comm config again.
 	fSuccess = GetCommState(hComm, &dcb);
 
-   if (!fSuccess)
-   {
-      //  Handle the error.
+	if (!fSuccess)
+	{
+		//  Handle the error.
 		printf ("GetCommState failed with error %lu.\n", GetLastError());
 		return (false);
 	}
@@ -128,7 +135,8 @@ BOOL SerialPort::OpenSerialPort(System::AnsiString asPort, System::AnsiString as
 
 // ---------------------------------------------------------------------------
 
-BOOL SerialPort::WriteABuffer(char *Buffer, DWORD dwToWrite) {
+BOOL SerialPort::WriteABuffer(char *Buffer, DWORD dwToWrite)
+{
 	OVERLAPPED osWrite = {0};
 
 	if (hComm != NULL) {
@@ -191,14 +199,16 @@ std::vector<unsigned char> SerialPort::ReadABuffer()
 
 //---------------------------------------------------------------------------
 
-unsigned int SerialPort::getBufferSize() {
+unsigned int SerialPort::getBufferSize()
+{
 	// Obtém o número de bytes no buffer serial a serem lidos.
 	return (dwRead);
 }
 
 // ---------------------------------------------------------------------------
 
-void SerialPort::CloseSerialPort() {
+void SerialPort::CloseSerialPort()
+{
 	// Fecha a porta serial aberta.
 	if (hComm != NULL) {
 		SetCommMask(hComm, 0L);

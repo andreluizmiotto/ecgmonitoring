@@ -9,15 +9,17 @@
 #pragma package(smart_init)
 #pragma resource "*.fmx"
 TfraChartView *fraChartView;
+void (*Callback)();
 //---------------------------------------------------------------------------
 __fastcall TfraChartView::TfraChartView(TComponent* Owner)
 	: TFrame(Owner)
 {
 }
 //---------------------------------------------------------------------------
-void TfraChartView::Init(TBlurEffect *blur)
+void TfraChartView::Init(TBlurEffect *blur, void (*PCallback)())
 {
 	FBlur = blur;
+	Callback = PCallback;
 	LoadDefaultValues();
 	HidePopup();
 }
@@ -29,6 +31,7 @@ void TfraChartView::Save()
 	{
 		vIniFile->WriteInteger("ChartView", "Frequency", this->cbeFrequency->ItemIndex);
 		vIniFile->WriteInteger("ChartView", "TimeWindow", this->cbeTimeWindow->ItemIndex);
+		Callback();
 	}
 	catch(Exception* e)
 	{

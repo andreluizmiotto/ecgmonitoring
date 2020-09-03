@@ -11,6 +11,7 @@
 #pragma package(smart_init)
 #pragma resource "*.fmx"
 TfraConfig *fraConfig;
+void (*Callback)();
 //---------------------------------------------------------------------------
 __fastcall TfraConfig::TfraConfig(TComponent* Owner)
 	: TFrame(Owner)
@@ -23,9 +24,10 @@ void __fastcall TfraConfig::btnGoBackClick(TObject *Sender)
 	HidePopup();
 }
 //---------------------------------------------------------------------------
-void TfraConfig::Init(TBlurEffect *blur)
+void TfraConfig::Init(TBlurEffect *blur, void (*PCallback)())
 {
 	FBlur = blur;
+	Callback = PCallback;
 	LoadComPorts();
 	LoadDefaultValues();
 	HidePopup();
@@ -38,6 +40,7 @@ void TfraConfig::Save()
 	{
 		vIniFile->WriteInteger("SerialComm", "SerialPort", this->cbbSerialPort->ItemIndex);
 		vIniFile->WriteInteger("SerialComm", "Baudrate", this->cbeBaudrate->ItemIndex);
+      Callback();
 	}
 	catch(Exception* e)
 	{
