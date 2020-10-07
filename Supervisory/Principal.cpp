@@ -58,7 +58,8 @@ ChartPlot * TfrmPrincipal::NewChartPlotObj()
 	vChartPlot->SetInitialX(0);
 	vChartPlot->SetInitialY(this->pltChart->Height/2);
 	vChartPlot->SetScreenSize(this->pltChart->Width, this->pltChart->Height);
-	vChartPlot->SetYRange(-4, 4);
+//	vChartPlot->SetYRange(-4, 4);
+	vChartPlot->SetYRange(0, 1023);
 	vChartPlot->SetSamplingRate(StrToIntDef(fraChartView->getFrequency(), 400));
 	vChartPlot->SetTimeWindow(StrToIntDef(fraChartView->getTimeWindow(), 5));
 	vChartPlot->SetDownsamplingRate(5);
@@ -185,5 +186,6 @@ void __fastcall TfrmPrincipal::FormResize(TObject *Sender)
 	UpdateConfig();
 }
 //---------------------------------------------------------------------------
+
 
 
