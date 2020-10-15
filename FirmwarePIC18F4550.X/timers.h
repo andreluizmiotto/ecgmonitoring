@@ -1,16 +1,18 @@
 /* 
- * File: config_bits.h 
+ * File: timers.h
  * Author: André Luiz Miotto
  * Date: 01/10/2020
  */
  
 #ifndef TIMERS_H
-#define	TIMERS_H
+#define TIMERS_H
 
-#include <xc.h> // include processor files - each processor file is guarded.  
+/* Timer 0 */
+void TIMER0_Init(void);
+void TIMER0_Set(unsigned int initialCount);
 
-void TMR1_Init(void);
-void TMR1_Reset(void);
+/* Timer 1 */
+void TIMER1_Init(void);
+void TIMER1_Reset(void);
 
-#endif	/* TIMERS_H */
-
+#endif /* TIMERS_H */

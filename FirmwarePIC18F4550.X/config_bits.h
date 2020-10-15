@@ -4,10 +4,13 @@
  * Date: 01/10/2020
  */
 
+// This is a guard condition so that contents of this file are not included
+// more than once.  
 #ifndef CONFIG_BITS_H
 #define	CONFIG_BITS_H
 
-#include <xc.h> // include processor files - each processor file is guarded.  
+#include <xc.h>
+#include "pic18f4550.h"
 #define _XTAL_FREQ 8000000
 
 // CONFIG1L
@@ -16,7 +19,7 @@
 #pragma config USBDIV = 1       // USB Clock Selection bit (used in Full-Speed USB mode only; UCFG:FSEN = 1) (USB clock source comes directly from the primary oscillator block with no postscale)
 
 // CONFIG1H
-#pragma config FOSC = INTOSC_EC // Oscillator Selection bits (Internal oscillator, CLKO function on RA6, EC used by USB (INTCKO))
+#pragma config FOSC = INTOSC_HS // Oscillator Selection bits (Internal oscillator, HS oscillator used by USB (INTHS))
 #pragma config FCMEN = OFF      // Fail-Safe Clock Monitor Enable bit (Fail-Safe Clock Monitor disabled)
 #pragma config IESO = OFF       // Internal/External Oscillator Switchover bit (Oscillator Switchover mode disabled)
 
@@ -24,14 +27,14 @@
 #pragma config PWRT = OFF       // Power-up Timer Enable bit (PWRT disabled)
 #pragma config BOR = ON         // Brown-out Reset Enable bits (Brown-out Reset enabled in hardware only (SBOREN is disabled))
 #pragma config BORV = 3         // Brown-out Reset Voltage bits (Minimum setting 2.05V)
-#pragma config VREGEN = ON      // USB Voltage Regulator Enable bit (USB voltage regulator enabled)
+#pragma config VREGEN = OFF     // USB Voltage Regulator Enable bit (USB voltage regulator disabled)
 
 // CONFIG2H
-#pragma config WDT = OFF        // Watchdog Timer Enable bit (WDT disabled (control is placed on the SWDTEN bit))
+#pragma config WDT = ON         // Watchdog Timer Enable bit (WDT enabled)
 #pragma config WDTPS = 32768    // Watchdog Timer Postscale Select bits (1:32768)
 
 // CONFIG3H
-#pragma config CCP2MX = OFF     // CCP2 MUX bit (CCP2 input/output is multiplexed with RB3)
+#pragma config CCP2MX = ON      // CCP2 MUX bit (CCP2 input/output is multiplexed with RC1)
 #pragma config PBADEN = OFF     // PORTB A/D Enable bit (PORTB<4:0> pins are configured as digital I/O on Reset)
 #pragma config LPT1OSC = OFF    // Low-Power Timer 1 Oscillator Enable bit (Timer1 configured for higher power operation)
 #pragma config MCLRE = ON       // MCLR Pin Enable bit (MCLR pin enabled; RE3 input pin disabled)

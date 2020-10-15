@@ -3,88 +3,63 @@
  * Author: André Luiz Miotto
  * Date: 01/10/2020
  */
-
+ 
 #include "config_bits.h"        /*Header file for Configuration Bits*/
 #include "eusart.h"
 #include "timers.h"
-#include <pic18f4550.h>         /*Header file PIC18f4550 definitions*/
-
-void MSdelay(unsigned int);
+#include "adc.h"
 
 unsigned char ADC_Buffer[4];
+unsigned char checksum = 0x50;
+unsigned char index = 0;
+
 unsigned int CODIGO = 0;
-unsigned char HIGH;
-unsigned char LOW;
+unsigned HIGH;
+unsigned LOW;
 
-void main()
+void main(void)
 {
-    OSCCON = 0x72;                /* Use internal oscillator of 8MHz Frequency */        
+    OSCCON = 0x72;                /* Use internal oscillator of 8MHz Frequency */
+    //PEIE_bit = 1;                 /* Enable Peripheral Interrupt */
+    //GIE_bit = 1;                  /* Enable Global Interrupt */
+    //CMCON = 0x07;                 /* Disable comparators */
     
-    //INTCONbits.GIE = 1;           /* Enable Global Interrupt */               
-    //INTCONbits.PEIE = 1;          /* Enable Peripheral Interrupt */
-    //INTCONbits.GIEH = 0;          /* Enable High priority interrupts */;
-    //INTCONbits.GIEL = 1;          /* Enable Low priority interrupts */
-    //INTCONbits.PEIE_GIEL = 1;     /* Enable Peripheral Interrupt */
-    //INTCONbits.GIE_GIEH = 1;      /* Enable Peripheral Interrupt */
-    //RCONbits.IPEN = 1;            /* Enable Interrupt priority */  
-    
-    /*INTCON2bits.RBPU = 1; 	// Desabilita o pull up
-
-	INTCONbits.PEIE	= 1;	// Habilita Interrupção de Periféricos do Microcontrolador.
-	INTCONbits.GIE	= 1;	// Habilita Interrupção Global.
-	USART_Init(115200,1);
-	TMR1_Init(0, 0, 0);
-	TMR0_Init(76, 1);
-	TMR3_Init(7936, 0, 0);
-
-	ADCON1bits.PCFG3 = 1;
-	ADCON1bits.PCFG2 = 1;
-	ADCON1bits.PCFG1 = 1;
-	ADCON1bits.PCFG0 = 1;
-    */
-    //TMR1_Init();  
     EUSART_Init(115200);
-    EUSART_WriteChar('H');
-    MSdelay(500);
-    
+    //TIMER1_Init();
+    //ADC_Init();
+
+    __delay_ms(500);
+
     while(1)
     {
-        EUSART_WriteChar('H');
-        EUSART_WriteChar('e');
-        EUSART_WriteChar('l');
-        EUSART_WriteChar('l');
-        EUSART_WriteChar('o');
-        LATB = 0XFF;
-        MSdelay (500);
-        LATB = 0;
-        MSdelay (500);
+        __delay_ms(5);
+/*        if (TMR1IF_bit) {
+            TIMER1_Reset();
+            ADC_Read(0);
+            ADC_Buffer[0] = ADRESH;
+            ADC_Buffer[1] = ADRESL;
+*/
+        HIGH = (CODIGO >> 8);
+        LOW = CODIGO;
+
+        if (CODIGO < 1023)
+           CODIGO++;
+        else
+            CODIGO = 0;
+
+        ADC_Buffer[0] = HIGH;
+        ADC_Buffer[1] = LOW;
+
+        EUSART_WriteChar('@');
+        EUSART_WriteChar('#');
+        EUSART_WriteChar('$');
+        
+        checksum = 0x50;
+        for(index = 0; index <= 1; index++) {
+           EUSART_WriteChar(ADC_Buffer[index]);
+           checksum ^= ADC_Buffer[index];
+        }
+        EUSART_WriteChar(checksum);	// Finalizador do pacote de dados por checksum.
     }
 }
 //-----------------------------------------------------------------------------
-/*void __interrupt() noPriorityIRS(void)
-{
-    
-}
-//-----------------------------------------------------------------------------
-void __interrupt(high_priority) highPriorityISR(void)
-{
-    EUSART_WriteChar('H');
-    EUSART_WriteChar('E');
-    EUSART_WriteChar('L');
-    EUSART_WriteChar('L');
-    if(T0IF){
-        TMR1_Reset();
-    }
-}
-//-----------------------------------------------------------------------------
-void __interrupt(low_priority) lowPriorityISR(void)
-{
-    
-}*/
-//-----------------------------------------------------------------------------
-void MSdelay(unsigned int val)
-{
-    unsigned int i,j;
-    for(i=0;i<val;i++)
-        for(j=0;j<165;j++);         /*This count Provide delay of 1 ms for 8MHz Frequency */
- } 
