@@ -9,42 +9,39 @@
 class ChartPlot
 {
 	private:
-		double initialX;
-		double initialY;
+		double centerYCoord;
+		double maxYAxis;
 		double x;
 		double y;
 		double screenWidth;
 		double screenHeight;
-		double maxYValue;
-		double minYValue;
-		double zeroYValue;
 		float incX;
 		int samplingRate;
 		int timeWindow;
 		int samplingCount;
 		int downsamplingRate;
-      bool movingAverageEnabled;
+		bool movingAverageEnabled;
 
 		TPointF previousPoint;
 		TPointF currentPoint;
 		TRectF flowRect;
 		TCanvas *canvas;
 		FIRFilter *firFilter;
+
+		bool Downsampling();
+		double ScaleY(double PYValue);
 	public:
 		ChartPlot(TCanvas *PCanvas);
 		~ChartPlot();
-		void SetInitialX(double PValue);
-		void SetInitialY(double PValue);
 		void SetScreenSize(double PWidth, double PHeight);
-		void SetYRange(double PMin, double PMax);
 		void SetSamplingRate(int PValue);
 		void SetTimeWindow(int PValue);
+		void SetYBounds(int PMaxYAxis);
 		void SetDownsamplingRate(int PValue);
 		void EnableMovingAverage(int PNPoints);
 		void Rewind();
-		double ScaleY(double PYValue);
 		void Plot(float PYValue);
-      bool Downsampling();
+      void Clean();
 };
 //---------------------------------------------------------------------------
 #endif

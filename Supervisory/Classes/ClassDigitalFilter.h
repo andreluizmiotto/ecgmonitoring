@@ -3,7 +3,7 @@
 #ifndef ClassDigitalFilterH
 #define ClassDigitalFilterH
 
-#define N 25
+#define N 20
 //---------------------------------------------------------------------------
 class FIRFilter
 {

@@ -8,16 +8,15 @@
 #include <iostream>
 #include <fstream>
 #include "ThreadSerialBufferIn.h"
+#include "Lib/Const.h"
 // ---------------------------------------------------------------------------
 SerialPort *serialPort;
-float FCH1Sample;
-float FCH2Sample;
+float FSample;
 
 // ---------------------------------------------------------------------------
 void __fastcall ThreadSerialBufferIn::Update()
 {
-	chartPlot->Plot(FCH1Sample);
-//   chartPlot->Plot(FCH2Sample);
+	chartPlot->Plot(FSample);
 }
 
 // ---------------------------------------------------------------------------
@@ -35,7 +34,7 @@ void __fastcall ThreadSerialBufferIn::Execute() {
 	std::ofstream vFile;
 	int vPacketLenght = 6;
 
-	vFile.open("Signal.txt", std::fstream::out | std::fstream::app);
+	vFile.open("ECGSignal.txt", std::fstream::out | std::fstream::app);
 
 	while (!Terminated) {
 		// Leitura serial
@@ -66,14 +65,14 @@ void __fastcall ThreadSerialBufferIn::Execute() {
 
 				if (vChecksum == (unsigned char)vPackage.at(vPacketLenght-1)) {
 					// Reconstrói as amostras em valores inteiros.
-					FCH1Sample = ((unsigned char)(vPackage.at(3)) << 8 | (unsigned char)(vPackage.at(4)));
-//					FCH2Sample = (((unsigned char)(vPackage.at(5)) << 8 | (unsigned char)(vPackage.at(6)))* 0.00488758553274)/0.01;
+					FSample = ((unsigned char)(vPackage.at(3)) << 8 | (unsigned char)(vPackage.at(4)));
+               FSample = ((FSample * VOLTAGE)/ADC_PRECISION) - OFFSET_VLTG;
 
 					// Insere as amostras no gráfico
 					Synchronize(&Update);
 
 					// Grava as amostras em arquivo.
-					vFile << FCH1Sample << "\n";// << FCH2Sample << "\n";
+					vFile << FSample << "\n";// << FCH2Sample << "\n";
 				}
 			}
 		}

@@ -159,9 +159,6 @@
         <None Include="Lib\Const.h">
             <BuildOrder>6</BuildOrder>
         </None>
-        <None Include="Lib\Utils.h">
-            <BuildOrder>11</BuildOrder>
-        </None>
         <CppCompile Include="Principal.cpp">
             <Form>frmPrincipal</Form>
             <FormType>fmx</FormType>

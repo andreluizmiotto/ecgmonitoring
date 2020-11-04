@@ -18,7 +18,7 @@
 TfrmPrincipal *frmPrincipal;
 ThreadSerialBufferIn *FThreadSerialBuffer;
 TThreadFilePlotting *FThreadFilePlotting;
-bool FThreadRunning;
+bool FThreadSerialBufferRunning, FThreadFilePlottingRunning;
 
 //---------------------------------------------------------------------------
 void UpdateConfig()
@@ -27,15 +27,13 @@ void UpdateConfig()
 	int ATimeWindow = StrToIntDef(frmPrincipal->fraChartView->getTimeWindow(), 5);
 	frmPrincipal->pltGrid->Frequency = frmPrincipal->pltGrid->Width/(5*ATimeWindow);
 	frmPrincipal->pltChart->Bitmap->Resize(frmPrincipal->pltChart->Width, frmPrincipal->pltChart->Height);
-	if (!FThreadRunning)
-		return;
-	if (FThreadFilePlotting != NULL) {
+	if (FThreadFilePlottingRunning) {
 		FThreadFilePlotting->chartPlot->SetScreenSize(frmPrincipal->pltChart->Width, frmPrincipal->pltChart->Height);
 		FThreadFilePlotting->chartPlot->SetSamplingRate(ASamplingRate);
 		FThreadFilePlotting->chartPlot->SetTimeWindow(ATimeWindow);
 		FThreadFilePlotting->chartPlot->Rewind();
 	}
-	if (FThreadSerialBuffer != NULL) {
+	if (FThreadSerialBufferRunning) {
 		FThreadSerialBuffer->chartPlot->SetScreenSize(frmPrincipal->pltChart->Width, frmPrincipal->pltChart->Height);
 		FThreadSerialBuffer->chartPlot->SetSamplingRate(ASamplingRate);
 		FThreadSerialBuffer->chartPlot->SetTimeWindow(ATimeWindow);
@@ -45,6 +43,8 @@ void UpdateConfig()
 // ---------------------------------------------------------------------------
 __fastcall TfrmPrincipal::TfrmPrincipal(TComponent* Owner) : TForm(Owner)
 {
+	FThreadSerialBufferRunning = false;
+	FThreadFilePlottingRunning = false;
 	this->ClientWidth = 1600;
 	this->ClientHeight = 900;
 	this->fraConfig->Init(blurBackground, &UpdateConfig);
@@ -55,25 +55,34 @@ __fastcall TfrmPrincipal::TfrmPrincipal(TComponent* Owner) : TForm(Owner)
 ChartPlot * TfrmPrincipal::NewChartPlotObj()
 {
 	ChartPlot *vChartPlot = new ChartPlot(pltChart->Bitmap->Canvas);
-	vChartPlot->SetInitialX(0);
-	vChartPlot->SetInitialY(this->pltChart->Height/2);
 	vChartPlot->SetScreenSize(this->pltChart->Width, this->pltChart->Height);
-//	vChartPlot->SetYRange(-4, 4);
-	vChartPlot->SetYRange(0, 1023);
 	vChartPlot->SetSamplingRate(StrToIntDef(fraChartView->getFrequency(), 400));
 	vChartPlot->SetTimeWindow(StrToIntDef(fraChartView->getTimeWindow(), 5));
-	vChartPlot->SetDownsamplingRate(5);
+	vChartPlot->SetYBounds(3);
+	vChartPlot->SetDownsamplingRate(1);
 	vChartPlot->EnableMovingAverage(5);
-
 	vChartPlot->Rewind();
 	return vChartPlot;
 }
 //---------------------------------------------------------------------------
+bool TfrmPrincipal::ThreadRunning(char *pResultMsg)
+{
+	if (FThreadSerialBufferRunning) {
+		pResultMsg = "Serial read thread is already running.";
+		return true;
+	}
+	if (FThreadFilePlottingRunning) {
+		pResultMsg = "File read thread is already running.";
+		return true;
+	}
+	return false;
+}
+//---------------------------------------------------------------------------
 void TfrmPrincipal::StartSerialReading()
 {
-	// Inicialização da porta serial.
-	if (FThreadRunning) {
-		ShowMessage("Thread is already running.");
+	char *pMsg;
+	if (ThreadRunning(pMsg)) {
+		ShowMessage(pMsg);
 		return;
 	}
 	SerialPort *vSerialPort = new SerialPort();
@@ -81,37 +90,37 @@ void TfrmPrincipal::StartSerialReading()
 	{
 		bool AConnection = vSerialPort->OpenSerialPort(fraConfig->getSerialPort(), fraConfig->getBaudrate());
 		if (!AConnection) {
-			ShowMessage("Falha na conexão.");
+			ShowMessage("Failed to establish connection. Check the serial port and try again.");
 			return;
 		}
 		btnConfig->Enabled = false;
 		FThreadSerialBuffer = new ThreadSerialBufferIn(true, vSerialPort, NewChartPlotObj());
 		FThreadSerialBuffer->Start(); // Run the thread
-		FThreadRunning = true;
+		FThreadSerialBufferRunning = true;
 	}
 	__except(EXCEPTION_EXECUTE_HANDLER)
 	{
-		ShowMessage("Falha na conexão.");
+		ShowMessage("Failed to establish connection. Check the serial port and try again.");
 		CloseSerialPort();
 	}
 }
 //---------------------------------------------------------------------------
 void TfrmPrincipal::CloseSerialPort()
 {
-	if (!FThreadRunning)
+	if (!FThreadSerialBufferRunning)
 		return;
 	FThreadSerialBuffer->Terminate();
 	FThreadSerialBuffer = NULL;
 	delete FThreadSerialBuffer;
 	btnConfig->Enabled = true;
-	FThreadRunning = false;
+	FThreadSerialBufferRunning = false;
 }
 //---------------------------------------------------------------------------
 void TfrmPrincipal::StartFilePlotting()
 {
-	// Inicialização da porta serial.
-	if (FThreadRunning) {
-		ShowMessage("Thread is already running.");
+	char *pMsg;
+	if (ThreadRunning(pMsg)) {
+		ShowMessage(pMsg);
 		return;
 	}
 
@@ -125,11 +134,11 @@ void TfrmPrincipal::StartFilePlotting()
 		FThreadFilePlotting = new TThreadFilePlotting(true, dlgOpenFile->FileName, NewChartPlotObj());
 		FThreadFilePlotting->Start(); // Run the thread
 		FThreadFilePlotting->OnTerminate = OnTerminateThread;
-		FThreadRunning = true;
+		FThreadFilePlottingRunning = true;
 	}
 	__except(EXCEPTION_EXECUTE_HANDLER)
 	{
-		ShowMessage("Falha na leitura do arquivo.");
+		ShowMessage("File reading failed. Try again.");
 		CloseFile();
 	}
 }
@@ -141,13 +150,13 @@ void __fastcall TfrmPrincipal::OnTerminateThread(TObject *Sender)
 //---------------------------------------------------------------------------
 void TfrmPrincipal::CloseFile()
 {
-	if (!FThreadRunning)
+	if (!FThreadFilePlottingRunning)
 		return;
 	FThreadFilePlotting->Terminate();
 	FThreadFilePlotting = NULL;
 	delete FThreadFilePlotting;
 	this->btnConfig->Enabled = true;
-	FThreadRunning = false;
+	FThreadFilePlottingRunning = false;
 }
 //---------------------------------------------------------------------------
 void __fastcall TfrmPrincipal::btnConnectClick(TObject *Sender)
@@ -158,11 +167,6 @@ void __fastcall TfrmPrincipal::btnConnectClick(TObject *Sender)
 void __fastcall TfrmPrincipal::btnDisconnectClick(TObject *Sender)
 {
 	CloseSerialPort();
-}
-//---------------------------------------------------------------------------
-void __fastcall TfrmPrincipal::btnCleanChartClick(TObject *Sender)
-{
-   this->pltChart->Repaint();
 }
 //---------------------------------------------------------------------------
 void __fastcall TfrmPrincipal::btnConfigClick(TObject *Sender)
@@ -186,6 +190,13 @@ void __fastcall TfrmPrincipal::FormResize(TObject *Sender)
 	UpdateConfig();
 }
 //---------------------------------------------------------------------------
-
-
+void __fastcall TfrmPrincipal::btnCleanChartClick(TObject *Sender)
+{
+	if (FThreadFilePlottingRunning)
+		FThreadFilePlotting->chartPlot->Clean();
+	if (FThreadSerialBufferRunning)
+		FThreadSerialBuffer->chartPlot->Clean();
+	this->pltChart->Bitmap->Clear(NULL);
+}
+//---------------------------------------------------------------------------
 

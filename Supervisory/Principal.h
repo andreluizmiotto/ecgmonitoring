@@ -51,17 +51,18 @@ __published: // IDE-managed Components
 	TPlotGrid *pltGrid;
 	void __fastcall btnConnectClick(TObject *Sender);
 	void __fastcall btnDisconnectClick(TObject *Sender);
-	void __fastcall btnCleanChartClick(TObject *Sender);
 	void __fastcall btnConfigClick(TObject *Sender);
 	void __fastcall btnChartViewClick(TObject *Sender);
 	void __fastcall btnOpenECGFileClick(TObject *Sender);
 	void __fastcall OnTerminateThread(TObject *Sender);
 	void __fastcall FormResize(TObject *Sender);
+	void __fastcall btnCleanChartClick(TObject *Sender);
 private: // User declarations
 	void StartSerialReading();
 	void CloseSerialPort();
 	void StartFilePlotting();
 	void CloseFile();
+   bool ThreadRunning(char *pResultMsg);
 	ChartPlot * NewChartPlotObj();
 public: // User declarations
 	__fastcall TfrmPrincipal(TComponent* Owner);

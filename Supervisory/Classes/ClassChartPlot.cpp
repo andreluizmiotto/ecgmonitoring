@@ -7,14 +7,12 @@
 ChartPlot::ChartPlot(TCanvas *PCanvas)
 {
 	canvas = PCanvas;
-	initialX = 0;
-	initialY = 0;
-	x = initialX;
-	y = initialY;
+	centerYCoord = 0;
+	maxYAxis = 0;
+	x = 0;
+	y = centerYCoord;
 	screenWidth = 0;
 	screenHeight = 0;
-	maxYValue = 0;
-	minYValue = 0;
 	incX = 0;
 	samplingCount = 0;
 	downsamplingRate = 1; // default
@@ -34,9 +32,13 @@ void ChartPlot::Plot(float PYValue)
 	if (Downsampling())
 		return;
 
+	x += incX;
+	if (x >= screenWidth)
+		Rewind();
+
 	y = ScaleY(PYValue);
 	currentPoint = TPointF(x, y);
-	flowRect = TRectF(x, 0, x+30, screenHeight);
+	flowRect = TRectF(x, 0, x+50, screenHeight);
 
 	canvas->BeginScene();
 	canvas->ClearRect(flowRect);
@@ -45,11 +47,7 @@ void ChartPlot::Plot(float PYValue)
 	canvas->DrawLine(previousPoint, currentPoint, 1);
 	canvas->EndScene();
 
-	x += incX*downsamplingRate;
-	if (x >= screenWidth)
-		Rewind();
-	else
-		previousPoint = currentPoint;
+	previousPoint = currentPoint;
 }
 // ---------------------------------------------------------------------------
 bool ChartPlot::Downsampling()
@@ -61,37 +59,14 @@ bool ChartPlot::Downsampling()
 // ---------------------------------------------------------------------------
 double ChartPlot::ScaleY(double PYValue)
 {
-	if (PYValue == zeroYValue)
-		return initialY;
-	double vY = (((screenHeight * PYValue)/(maxYValue)));
-	if (minYValue < 0)
-		vY = initialY + (vY*(-1));
-	return vY;
-}
-// ---------------------------------------------------------------------------
-void ChartPlot::SetInitialX(double PValue)
-{
-	initialX = PValue;
-}
-// ---------------------------------------------------------------------------
-void ChartPlot::SetInitialY(double PValue)
-{
-	initialY = PValue;
+	return centerYCoord - (centerYCoord * PYValue)/maxYAxis;
 }
 // ---------------------------------------------------------------------------
 void ChartPlot::SetScreenSize(double PWidth, double PHeight)
 {
 	screenWidth = PWidth;
 	screenHeight = PHeight;
-}
-// ---------------------------------------------------------------------------
-void ChartPlot::SetYRange(double PMin, double PMax)
-{
-	maxYValue = PMax;
-	minYValue = PMin;
-	zeroYValue = (minYValue + maxYValue);
-	if (zeroYValue != 0)
-		zeroYValue = (zeroYValue/2);
+	centerYCoord = (screenHeight/2);
 }
 // ---------------------------------------------------------------------------
 void ChartPlot::SetSamplingRate(int PValue)
@@ -104,6 +79,11 @@ void ChartPlot::SetTimeWindow(int PValue)
 	timeWindow = PValue;
 }
 // ---------------------------------------------------------------------------
+void ChartPlot::SetYBounds(int PMaxYAxis)
+{
+	maxYAxis = PMaxYAxis;
+}
+// ---------------------------------------------------------------------------
 void ChartPlot::SetDownsamplingRate(int PValue)
 {
 	downsamplingRate = PValue;
@@ -111,17 +91,26 @@ void ChartPlot::SetDownsamplingRate(int PValue)
 // ---------------------------------------------------------------------------
 void ChartPlot::Rewind()
 {
-	x = initialX;
+	x = 0;
 	if (y == 0)
-		y = initialY;
+		y = centerYCoord;
 	previousPoint = TPointF(x, y);
 	samplingCount = downsamplingRate;
-	incX = screenWidth/(samplingRate * timeWindow);
+	incX = (screenWidth/(samplingRate * timeWindow))*downsamplingRate;
 }
 // ---------------------------------------------------------------------------
 void ChartPlot::EnableMovingAverage(int PNPoints)
 {
 	firFilter = new FIRFilter();
 	movingAverageEnabled = true;
+}
+// ---------------------------------------------------------------------------
+void ChartPlot::Clean()
+{
+	Rewind();
+	flowRect = TRectF(x, 0, screenWidth, screenHeight);
+	canvas->BeginScene();
+	canvas->ClearRect(flowRect);
+	canvas->EndScene();
 }
 // ---------------------------------------------------------------------------

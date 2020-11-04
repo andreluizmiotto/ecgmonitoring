@@ -6,12 +6,13 @@
 #include "config_bits.h"
 #include "eusart.h"
 #include "timers.h"
+#include "adc.h"
 
 unsigned char ADC_Buffer[4];
 unsigned char checksum = 0x50;
 unsigned char index = 0;
 
-unsigned int CODIGO = 0;
+void initMCU(void);
 
 //-----------------------------------------------------------------------------
 void __interrupt(high_priority) highPriorityInterrupt(void) 
@@ -19,13 +20,10 @@ void __interrupt(high_priority) highPriorityInterrupt(void)
     if (PIR1bits.TMR1IF) {
         TIMER1_Reset();
         
-        if (CODIGO < 1023)
-           CODIGO++;
-        else
-            CODIGO = 0;
-
-        ADC_Buffer[0] = (CODIGO >> 8);
-        ADC_Buffer[1] = CODIGO;
+        ADC_Read(0);
+        
+        ADC_Buffer[0] = ADRESH;
+        ADC_Buffer[1] = ADRESL;
 
         EUSART_WriteChar('@');
         EUSART_WriteChar('#');
@@ -42,8 +40,10 @@ void __interrupt(high_priority) highPriorityInterrupt(void)
 //-----------------------------------------------------------------------------
 void main(void) {
     
+//    initMCU();
     EUSART_Init(115200);
     TIMER1_Init();
+    ADC_Init();
     
     __delay_ms(500);
     
@@ -55,5 +55,23 @@ void main(void) {
     }
     
     return;
+}
+//-----------------------------------------------------------------------------
+void initMCU(void)
+{
+    RCON = 0x80;                /* Clen reset registers */
+    CMCON = 0x07;               /* Disable comparators */
+    
+    TRISA = 0b00000000;
+    TRISB = 0b00000000;
+	TRISC = 0b00000011;
+    TRISD = 0b00000000;
+    TRISE = 0b00000000;    
+
+    LATA = 0b00000000;
+    LATB = 0b00000000;
+    LATC = 0b00000000;
+    LATD = 0b00000000;
+    LATE = 0b00000000;
 }
 //-----------------------------------------------------------------------------
