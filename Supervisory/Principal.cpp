@@ -65,14 +65,16 @@ ChartPlot * TfrmPrincipal::NewChartPlotObj()
 	return vChartPlot;
 }
 //---------------------------------------------------------------------------
-bool TfrmPrincipal::ThreadRunning(char *pResultMsg)
+bool TfrmPrincipal::ThreadRunning(bool pShowMsg)
 {
 	if (FThreadSerialBufferRunning) {
-		pResultMsg = "Serial read thread is already running.";
+		if (pShowMsg)
+			ShowMessage("Serial read thread is running.");
 		return true;
 	}
 	if (FThreadFilePlottingRunning) {
-		pResultMsg = "File read thread is already running.";
+		if (pShowMsg)
+			ShowMessage("File read thread is running.");
 		return true;
 	}
 	return false;
@@ -80,11 +82,8 @@ bool TfrmPrincipal::ThreadRunning(char *pResultMsg)
 //---------------------------------------------------------------------------
 void TfrmPrincipal::StartSerialReading()
 {
-	char *pMsg;
-	if (ThreadRunning(pMsg)) {
-		ShowMessage(pMsg);
+	if (ThreadRunning(true))
 		return;
-	}
 	SerialPort *vSerialPort = new SerialPort();
 	try
 	{
@@ -93,7 +92,6 @@ void TfrmPrincipal::StartSerialReading()
 			ShowMessage("Failed to establish connection. Check the serial port and try again.");
 			return;
 		}
-		btnConfig->Enabled = false;
 		FThreadSerialBuffer = new ThreadSerialBufferIn(true, vSerialPort, NewChartPlotObj());
 		FThreadSerialBuffer->Start(); // Run the thread
 		FThreadSerialBufferRunning = true;
@@ -112,25 +110,20 @@ void TfrmPrincipal::CloseSerialPort()
 	FThreadSerialBuffer->Terminate();
 	FThreadSerialBuffer = NULL;
 	delete FThreadSerialBuffer;
-	btnConfig->Enabled = true;
 	FThreadSerialBufferRunning = false;
 }
 //---------------------------------------------------------------------------
 void TfrmPrincipal::StartFilePlotting()
 {
-	char *pMsg;
-	if (ThreadRunning(pMsg)) {
-		ShowMessage(pMsg);
+	if (ThreadRunning(true))
 		return;
-	}
 
 	dlgOpenFile->Options.Clear();
-	dlgOpenFile->Filter = "Text files (*.txt)|*.txt|All files (*.*)|*.*";
+	dlgOpenFile->Filter = "ECG files (*.ecg)|*.ecg|All files (*.*)|*.*";
 	if (!dlgOpenFile->Execute())
 		return;
 	try
 	{
-		btnConfig->Enabled = false;
 		FThreadFilePlotting = new TThreadFilePlotting(true, dlgOpenFile->FileName, NewChartPlotObj());
 		FThreadFilePlotting->Start(); // Run the thread
 		FThreadFilePlotting->OnTerminate = OnTerminateThread;
@@ -155,7 +148,6 @@ void TfrmPrincipal::CloseFile()
 	FThreadFilePlotting->Terminate();
 	FThreadFilePlotting = NULL;
 	delete FThreadFilePlotting;
-	this->btnConfig->Enabled = true;
 	FThreadFilePlottingRunning = false;
 }
 //---------------------------------------------------------------------------
@@ -171,12 +163,12 @@ void __fastcall TfrmPrincipal::btnDisconnectClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TfrmPrincipal::btnConfigClick(TObject *Sender)
 {
-	fraConfig->ShowPopup();
+	TThread::Synchronize(NULL, fraConfig->ShowPopup);
 }
 //---------------------------------------------------------------------------
 void __fastcall TfrmPrincipal::btnChartViewClick(TObject *Sender)
 {
-	fraChartView->ShowPopup();
+	TThread::Synchronize(NULL, fraChartView->ShowPopup);
 }
 //---------------------------------------------------------------------------
 void __fastcall TfrmPrincipal::btnOpenECGFileClick(TObject *Sender)
@@ -199,4 +191,3 @@ void __fastcall TfrmPrincipal::btnCleanChartClick(TObject *Sender)
 	this->pltChart->Bitmap->Clear(NULL);
 }
 //---------------------------------------------------------------------------
-

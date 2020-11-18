@@ -16,6 +16,8 @@ class ThreadSerialBufferIn : public TThread
 		void __fastcall Update();
 	private:
 		void DeleteInvalidPackage(std::string *PSerialBuffer);
+		void IncAcquisitionTime();
+      std::string LeftPadMilliseconds();
 	public:
 		__fastcall ThreadSerialBufferIn(bool CreateSuspended, SerialPort *PSerialPort, ChartPlot *PChartPlot);
 		ChartPlot *chartPlot;

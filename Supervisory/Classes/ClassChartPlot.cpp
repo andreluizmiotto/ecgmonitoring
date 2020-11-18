@@ -27,7 +27,7 @@ ChartPlot::~ChartPlot()
 // ---------------------------------------------------------------------------
 void ChartPlot::Plot(float PYValue)
 {
-	if (movingAverageEnabled)
+ 	if (movingAverageEnabled)
 		PYValue = firFilter->MovingAverage(PYValue);
 	if (Downsampling())
 		return;
@@ -112,5 +112,10 @@ void ChartPlot::Clean()
 	canvas->BeginScene();
 	canvas->ClearRect(flowRect);
 	canvas->EndScene();
+}
+// ---------------------------------------------------------------------------
+int ChartPlot::GetSamplingRate()
+{
+   return samplingRate;
 }
 // ---------------------------------------------------------------------------

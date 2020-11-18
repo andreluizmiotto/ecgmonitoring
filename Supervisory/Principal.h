@@ -62,7 +62,7 @@ private: // User declarations
 	void CloseSerialPort();
 	void StartFilePlotting();
 	void CloseFile();
-   bool ThreadRunning(char *pResultMsg);
+	bool ThreadRunning(bool pShowMsg);
 	ChartPlot * NewChartPlotObj();
 public: // User declarations
 	__fastcall TfrmPrincipal(TComponent* Owner);

@@ -18,7 +18,7 @@ protected:
 	void __fastcall Update();
 public:
 	__fastcall TThreadFilePlotting(bool CreateSuspended, AnsiString PFileName, ChartPlot *PChartPlot);
-   ChartPlot *chartPlot;
+	ChartPlot *chartPlot;
 };
 //---------------------------------------------------------------------------
 #endif

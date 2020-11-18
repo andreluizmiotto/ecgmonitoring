@@ -46,7 +46,7 @@ private:	// User declarations
 public:		// User declarations
 	__fastcall TfraConfig(TComponent* Owner);
 	void Init(TBlurEffect *blur, void (*PCallback)());
-	void ShowPopup();
+	void __fastcall ShowPopup();
 	AnsiString getSerialPort();
 	AnsiString getBaudrate();
 };

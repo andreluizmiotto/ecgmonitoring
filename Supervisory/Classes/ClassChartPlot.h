@@ -41,7 +41,8 @@ class ChartPlot
 		void EnableMovingAverage(int PNPoints);
 		void Rewind();
 		void Plot(float PYValue);
-      void Clean();
+		void Clean();
+		int GetSamplingRate();
 };
 //---------------------------------------------------------------------------
 #endif

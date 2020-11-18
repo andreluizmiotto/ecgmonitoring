@@ -62,7 +62,7 @@ void TfraConfig::LoadDefaultValues()
 	delete vIniFile;
 }
 //---------------------------------------------------------------------------
-void TfraConfig::ShowPopup()
+void __fastcall TfraConfig::ShowPopup()
 {
 	this->Visible = true;
 	FBlur->Enabled = true;
@@ -80,9 +80,7 @@ void TfraConfig::LoadComPorts()
 	TStringList *AComPorts;
 	try {
 		AComPorts = ASerialPort->LoadComPorts();
-	}
-	__finally
-	{
+	} __finally {
 		ASerialPort->CloseSerialPort();
 		ASerialPort = NULL;
 		delete ASerialPort;

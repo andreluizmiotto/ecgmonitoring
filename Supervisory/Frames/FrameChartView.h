@@ -41,7 +41,7 @@ private:	// User declarations
 public:		// User declarations
 	__fastcall TfraChartView(TComponent* Owner);
 	void Init(TBlurEffect *blur, void (*f)());
-	void ShowPopup();
+	void __fastcall ShowPopup();
 	AnsiString getFrequency();
 	AnsiString getTimeWindow();
 };

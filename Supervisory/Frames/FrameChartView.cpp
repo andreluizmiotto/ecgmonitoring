@@ -53,7 +53,7 @@ void TfraChartView::LoadDefaultValues()
 	delete vIniFile;
 }
 //---------------------------------------------------------------------------
-void TfraChartView::ShowPopup()
+void __fastcall TfraChartView::ShowPopup()
 {
 	this->Visible = true;
 	FBlur->Enabled = true;

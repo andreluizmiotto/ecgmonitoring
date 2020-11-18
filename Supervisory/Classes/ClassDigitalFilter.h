@@ -3,13 +3,13 @@
 #ifndef ClassDigitalFilterH
 #define ClassDigitalFilterH
 
-#define N 20
+#include "Lib/Const.h"
 //---------------------------------------------------------------------------
 class FIRFilter
 {
 	private:
 		int size;
-		float values[N];
+		float values[MOV_AVG];
 	public:
 		FIRFilter();
 		~FIRFilter();

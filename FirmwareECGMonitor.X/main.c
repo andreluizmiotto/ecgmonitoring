@@ -12,8 +12,6 @@ unsigned char ADC_Buffer[4];
 unsigned char checksum = 0x50;
 unsigned char index = 0;
 
-void initMCU(void);
-
 //-----------------------------------------------------------------------------
 void __interrupt(high_priority) highPriorityInterrupt(void) 
 {
@@ -21,10 +19,10 @@ void __interrupt(high_priority) highPriorityInterrupt(void)
         TIMER1_Reset();
         
         ADC_Read(0);
-        
-        ADC_Buffer[0] = ADRESH;
-        ADC_Buffer[1] = ADRESL;
+        ADC_Buffer[0] = ADRESH; // AD Result high register
+        ADC_Buffer[1] = ADRESL; // AD Result low register
 
+        // Header string
         EUSART_WriteChar('@');
         EUSART_WriteChar('#');
         EUSART_WriteChar('$');
@@ -34,13 +32,12 @@ void __interrupt(high_priority) highPriorityInterrupt(void)
            EUSART_WriteChar(ADC_Buffer[index]);
            checksum ^= ADC_Buffer[index];
         }
-        EUSART_WriteChar(checksum);	// Finalizador do pacote de dados por checksum.
+        EUSART_WriteChar(checksum);
     }
 }
 //-----------------------------------------------------------------------------
-void main(void) {
-    
-//    initMCU();
+void main(void) 
+{   
     EUSART_Init(115200);
     TIMER1_Init();
     ADC_Init();
@@ -50,28 +47,6 @@ void main(void) {
     INTCONbits.PEIE = 1;                 /* Enable Peripheral Interrupt */
     INTCONbits.GIE = 1;                  /* Enable Global Interrupt */
     
-    while (1) {
-
-    }
-    
-    return;
-}
-//-----------------------------------------------------------------------------
-void initMCU(void)
-{
-    RCON = 0x80;                /* Clen reset registers */
-    CMCON = 0x07;               /* Disable comparators */
-    
-    TRISA = 0b00000000;
-    TRISB = 0b00000000;
-	TRISC = 0b00000011;
-    TRISD = 0b00000000;
-    TRISE = 0b00000000;    
-
-    LATA = 0b00000000;
-    LATB = 0b00000000;
-    LATC = 0b00000000;
-    LATD = 0b00000000;
-    LATE = 0b00000000;
+    while (1) { }                        /* Infinite loop */
 }
 //-----------------------------------------------------------------------------

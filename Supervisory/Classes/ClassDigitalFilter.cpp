@@ -22,7 +22,7 @@ float FIRFilter::MovingAverage(float PValue)
 	for (int i = size; i > 0; i--)
 		values[i] = values[i-1];
 	values[0] = PValue;
-	if (size < N)
+	if (size < MOV_AVG)
 		size++;
 	for (int i = 0; i < size; i++)
 		vSum += values[i];
