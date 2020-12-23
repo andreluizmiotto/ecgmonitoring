@@ -8,14 +8,12 @@
 #include "ThreadFilePlotting.h"
 //---------------------------------------------------------------------------
 std::ifstream ecgFile;
-float FSignal;
-unsigned int FCount;
-double xPixels, yPixels, FResolution;
+float FSample;
 
 // ---------------------------------------------------------------------------
 void __fastcall TThreadFilePlotting::Update()
 {
-	chartPlot->Plot(FSignal);
+	chartPlot->Plot(FSample);
 }
 
 // ---------------------------------------------------------------------------
@@ -34,7 +32,7 @@ void __fastcall TThreadFilePlotting::Execute()
 
 	while (std::getline(ecgFile, line)) {
 		line = line.substr(13, 5);
-		FSignal = std::stof(line);
+		FSample = std::stof(line);
 
 		Synchronize(&Update);
 	}

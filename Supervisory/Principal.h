@@ -58,10 +58,10 @@ __published: // IDE-managed Components
 	void __fastcall FormResize(TObject *Sender);
 	void __fastcall btnCleanChartClick(TObject *Sender);
 private: // User declarations
-	void StartSerialReading();
-	void CloseSerialPort();
-	void StartFilePlotting();
-	void CloseFile();
+	void StartSerialReadingThread();
+	void TerminateSerialReadingThread();
+	void StartFilePlottingThread();
+	void TerminateFilePlottingThread();
 	bool ThreadRunning(bool pShowMsg);
 	ChartPlot * NewChartPlotObj();
 public: // User declarations

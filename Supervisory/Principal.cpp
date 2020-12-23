@@ -28,13 +28,11 @@ void UpdateConfig()
 	frmPrincipal->pltGrid->Frequency = frmPrincipal->pltGrid->Width/(5*ATimeWindow);
 	frmPrincipal->pltChart->Bitmap->Resize(frmPrincipal->pltChart->Width, frmPrincipal->pltChart->Height);
 	if (FThreadFilePlottingRunning) {
-		FThreadFilePlotting->chartPlot->SetScreenSize(frmPrincipal->pltChart->Width, frmPrincipal->pltChart->Height);
 		FThreadFilePlotting->chartPlot->SetSamplingRate(ASamplingRate);
 		FThreadFilePlotting->chartPlot->SetTimeWindow(ATimeWindow);
 		FThreadFilePlotting->chartPlot->Rewind();
 	}
 	if (FThreadSerialBufferRunning) {
-		FThreadSerialBuffer->chartPlot->SetScreenSize(frmPrincipal->pltChart->Width, frmPrincipal->pltChart->Height);
 		FThreadSerialBuffer->chartPlot->SetSamplingRate(ASamplingRate);
 		FThreadSerialBuffer->chartPlot->SetTimeWindow(ATimeWindow);
 		FThreadSerialBuffer->chartPlot->Rewind();
@@ -45,8 +43,8 @@ __fastcall TfrmPrincipal::TfrmPrincipal(TComponent* Owner) : TForm(Owner)
 {
 	FThreadSerialBufferRunning = false;
 	FThreadFilePlottingRunning = false;
-	this->ClientWidth = 1600;
-	this->ClientHeight = 900;
+	this->ClientWidth = 1000;
+	this->ClientHeight = 600;
 	this->fraConfig->Init(blurBackground, &UpdateConfig);
 	this->fraChartView->Init(blurBackground, &UpdateConfig);
 	this->pltChart->Bitmap = new TBitmap(frmPrincipal->pltChart->Width, frmPrincipal->pltChart->Height);
@@ -55,7 +53,6 @@ __fastcall TfrmPrincipal::TfrmPrincipal(TComponent* Owner) : TForm(Owner)
 ChartPlot * TfrmPrincipal::NewChartPlotObj()
 {
 	ChartPlot *vChartPlot = new ChartPlot(pltChart->Bitmap->Canvas);
-	vChartPlot->SetScreenSize(this->pltChart->Width, this->pltChart->Height);
 	vChartPlot->SetSamplingRate(StrToIntDef(fraChartView->getFrequency(), 400));
 	vChartPlot->SetTimeWindow(StrToIntDef(fraChartView->getTimeWindow(), 5));
 	vChartPlot->SetYBounds(3);
@@ -80,7 +77,7 @@ bool TfrmPrincipal::ThreadRunning(bool pShowMsg)
 	return false;
 }
 //---------------------------------------------------------------------------
-void TfrmPrincipal::StartSerialReading()
+void TfrmPrincipal::StartSerialReadingThread()
 {
 	if (ThreadRunning(true))
 		return;
@@ -99,11 +96,11 @@ void TfrmPrincipal::StartSerialReading()
 	__except(EXCEPTION_EXECUTE_HANDLER)
 	{
 		ShowMessage("Failed to establish connection. Check the serial port and try again.");
-		CloseSerialPort();
+		TerminateSerialReadingThread();
 	}
 }
 //---------------------------------------------------------------------------
-void TfrmPrincipal::CloseSerialPort()
+void TfrmPrincipal::TerminateSerialReadingThread()
 {
 	if (!FThreadSerialBufferRunning)
 		return;
@@ -113,7 +110,7 @@ void TfrmPrincipal::CloseSerialPort()
 	FThreadSerialBufferRunning = false;
 }
 //---------------------------------------------------------------------------
-void TfrmPrincipal::StartFilePlotting()
+void TfrmPrincipal::StartFilePlottingThread()
 {
 	if (ThreadRunning(true))
 		return;
@@ -132,16 +129,16 @@ void TfrmPrincipal::StartFilePlotting()
 	__except(EXCEPTION_EXECUTE_HANDLER)
 	{
 		ShowMessage("File reading failed. Try again.");
-		CloseFile();
+		TerminateFilePlottingThread();
 	}
 }
 //---------------------------------------------------------------------------
 void __fastcall TfrmPrincipal::OnTerminateThread(TObject *Sender)
 {
-	CloseFile();
+	TerminateFilePlottingThread();
 }
 //---------------------------------------------------------------------------
-void TfrmPrincipal::CloseFile()
+void TfrmPrincipal::TerminateFilePlottingThread()
 {
 	if (!FThreadFilePlottingRunning)
 		return;
@@ -153,12 +150,13 @@ void TfrmPrincipal::CloseFile()
 //---------------------------------------------------------------------------
 void __fastcall TfrmPrincipal::btnConnectClick(TObject *Sender)
 {
-	StartSerialReading();
+	StartSerialReadingThread();
 }
 //---------------------------------------------------------------------------
 void __fastcall TfrmPrincipal::btnDisconnectClick(TObject *Sender)
 {
-	CloseSerialPort();
+	TerminateSerialReadingThread()
+	;
 }
 //---------------------------------------------------------------------------
 void __fastcall TfrmPrincipal::btnConfigClick(TObject *Sender)
@@ -173,7 +171,7 @@ void __fastcall TfrmPrincipal::btnChartViewClick(TObject *Sender)
 //---------------------------------------------------------------------------
 void __fastcall TfrmPrincipal::btnOpenECGFileClick(TObject *Sender)
 {
-	StartFilePlotting();
+	StartFilePlottingThread();
 }
 //---------------------------------------------------------------------------
 

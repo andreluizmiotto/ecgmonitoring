@@ -11,8 +11,6 @@ ChartPlot::ChartPlot(TCanvas *PCanvas)
 	maxYAxis = 0;
 	x = 0;
 	y = centerYCoord;
-	screenWidth = 0;
-	screenHeight = 0;
 	incX = 0;
 	samplingCount = 0;
 	downsamplingRate = 1; // default
@@ -27,18 +25,18 @@ ChartPlot::~ChartPlot()
 // ---------------------------------------------------------------------------
 void ChartPlot::Plot(float PYValue)
 {
- 	if (movingAverageEnabled)
+	if (movingAverageEnabled)
 		PYValue = firFilter->MovingAverage(PYValue);
 	if (Downsampling())
 		return;
 
 	x += incX;
-	if (x >= screenWidth)
+	if (x >= canvas->Width)
 		Rewind();
 
 	y = ScaleY(PYValue);
 	currentPoint = TPointF(x, y);
-	flowRect = TRectF(x, 0, x+50, screenHeight);
+	flowRect = TRectF(x, 0, x+50, canvas->Height);
 
 	canvas->BeginScene();
 	canvas->ClearRect(flowRect);
@@ -59,14 +57,7 @@ bool ChartPlot::Downsampling()
 // ---------------------------------------------------------------------------
 double ChartPlot::ScaleY(double PYValue)
 {
-	return centerYCoord - (centerYCoord * PYValue)/maxYAxis;
-}
-// ---------------------------------------------------------------------------
-void ChartPlot::SetScreenSize(double PWidth, double PHeight)
-{
-	screenWidth = PWidth;
-	screenHeight = PHeight;
-	centerYCoord = (screenHeight/2);
+	return centerYCoord - double(centerYCoord * PYValue)/double(maxYAxis);
 }
 // ---------------------------------------------------------------------------
 void ChartPlot::SetSamplingRate(int PValue)
@@ -92,11 +83,12 @@ void ChartPlot::SetDownsamplingRate(int PValue)
 void ChartPlot::Rewind()
 {
 	x = 0;
+	centerYCoord = (double(canvas->Height)/2.0);
 	if (y == 0)
 		y = centerYCoord;
 	previousPoint = TPointF(x, y);
 	samplingCount = downsamplingRate;
-	incX = (screenWidth/(samplingRate * timeWindow))*downsamplingRate;
+	incX = (double(canvas->Width)/double(samplingRate * timeWindow))*double(downsamplingRate);
 }
 // ---------------------------------------------------------------------------
 void ChartPlot::EnableMovingAverage(int PNPoints)
@@ -108,7 +100,7 @@ void ChartPlot::EnableMovingAverage(int PNPoints)
 void ChartPlot::Clean()
 {
 	Rewind();
-	flowRect = TRectF(x, 0, screenWidth, screenHeight);
+	flowRect = TRectF(x, 0, canvas->Width, canvas->Height);
 	canvas->BeginScene();
 	canvas->ClearRect(flowRect);
 	canvas->EndScene();

@@ -13,9 +13,7 @@ class ChartPlot
 		double maxYAxis;
 		double x;
 		double y;
-		double screenWidth;
-		double screenHeight;
-		float incX;
+		double incX;
 		int samplingRate;
 		int timeWindow;
 		int samplingCount;
@@ -33,7 +31,6 @@ class ChartPlot
 	public:
 		ChartPlot(TCanvas *PCanvas);
 		~ChartPlot();
-		void SetScreenSize(double PWidth, double PHeight);
 		void SetSamplingRate(int PValue);
 		void SetTimeWindow(int PValue);
 		void SetYBounds(int PMaxYAxis);
