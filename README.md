@@ -17,3 +17,12 @@ graphic reproduction of the sportsman’s electrocardiographic tracing. Through 
 is also possible to upload and graphically reproduce previously packaged samples, stored in
 standard ECG files. Although the hardware prototype needs numerous improvements to work in
 adverse conditions, the results obtained are encouraging, enabling the proposed methodology.
+
+# Final paper (in portuguese)
+[TCC II - André Luiz Miotto.pdf](https://github.com/andreluizmiotto/ecgmonitoring/files/6386429/TCC.II.-.Andre.Luiz.Miotto.pdf)
+
+# Supervisory main screen
+![Soft_Supervisorio](https://user-images.githubusercontent.com/43590504/116285130-37d1da00-a764-11eb-9375-17aad5b336d4.png)
+
+# Acquisition of real cardiac biopotentials at 400 Hz
+![ECG_400HzFiltrado](https://user-images.githubusercontent.com/43590504/116285614-ab73e700-a764-11eb-8cf4-978bac82169d.png)
